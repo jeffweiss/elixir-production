@@ -1,22 +1,11 @@
+---
+name: cognitive-complexity
+description: Use when analyzing cognitive load, code complexity, onboarding difficulty, readability concerns, maintainability issues, or applying Ousterhout principles for deep modules, reducing complexity, and strategic programming approaches
+---
+
 # Cognitive Complexity Skill
 
-## Skill Identity
-
 This skill provides comprehensive knowledge of cognitive complexity analysis based on John Ousterhout's "A Philosophy of Software Design", focusing on deep modules, reducing complexity through better abstractions, and strategic programming approaches that minimize cognitive load.
-
-## Triggers
-
-Activate this skill when conversation includes:
-- <example>"onboarding"</example>
-- <example>"complexity"</example>
-- <example>"cognitive"</example>
-- <example>"cognitive load"</example>
-- <example>"readability"</example>
-- <example>"maintainability"</example>
-- <example>"code comprehension"</example>
-- <example>"Ousterhout"</example>
-- <example>"deep modules"</example>
-- <example>"shallow modules"</example>
 
 ## Core Philosophy: Ousterhout's Principles
 

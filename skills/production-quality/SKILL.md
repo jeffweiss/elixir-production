@@ -1,21 +1,11 @@
+---
+name: production-quality
+description: Use when preparing for production deployment, conducting code reviews, setting up precommit workflows, adding type specifications, implementing testing strategies, addressing security concerns, or ensuring documentation quality and best practices
+---
+
 # Production Quality Skill
 
-## Skill Identity
-
 This skill provides comprehensive knowledge of production-quality standards, workflows, and best practices for Elixir development. It covers precommit workflows, testing strategies, type specifications, documentation requirements, and security considerations.
-
-## Triggers
-
-Activate this skill when conversation includes:
-- <example>"production"</example>
-- <example>"quality"</example>
-- <example>"review"</example>
-- <example>"commit"</example>
-- <example>"precommit"</example>
-- <example>"typespec"</example>
-- <example>"testing"</example>
-- <example>"security"</example>
-- <example>"documentation"</example>
 
 ## Precommit Workflow
 

@@ -1,21 +1,11 @@
+---
+name: elixir-patterns
+description: Use when implementing or refactoring Elixir code, designing system architecture, working with functional programming patterns, OTP design patterns (GenServer, supervision trees), or needing idiomatic Elixir code structures and best practices
+---
+
 # Elixir Patterns Skill
 
-## Skill Identity
-
 This skill provides comprehensive knowledge of production-ready Elixir patterns including functional programming principles, OTP design patterns, and idiomatic Elixir code structures.
-
-## Triggers
-
-Activate this skill when conversation includes:
-- <example>"implement"</example>
-- <example>"refactor"</example>
-- <example>"design"</example>
-- <example>"architecture"</example>
-- <example>"elixir pattern"</example>
-- <example>"functional"</example>
-- <example>"OTP"</example>
-- <example>"genserver"</example>
-- <example>"supervision"</example>
 
 ## Core Patterns
 
