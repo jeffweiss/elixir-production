@@ -271,7 +271,7 @@ Check this file first when starting new features.
 ## Hooks and Automation
 
 This project uses Claude Code hooks for quality enforcement:
-- **PreToolUse**: Safety-net blocks destructive operations
+- **PreToolUse**: Reminds about Elixir best practices before code changes
 - **PostToolUse**: Validates code changes meet precommit standards
 - **SessionStart**: Loads project-learnings.md and standards
 - **SessionEnd**: Suggests updating project-learnings.md

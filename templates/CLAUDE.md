@@ -242,7 +242,7 @@ Closes #123
 ### Claude Code Integration
 This project uses Claude Code hooks for automation:
 
-- **Safety net**: Prevents destructive operations
+- **Best practice reminders**: Prompts about Elixir quality standards before code changes
 - **Quality enforcement**: Validates precommit checks
 - **Context loading**: Loads project standards and learnings
 - **Learning capture**: Suggests updating project knowledge

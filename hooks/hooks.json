@@ -1,18 +1,7 @@
 {
-  "description": "Elixir production quality enforcement with safety-net protection",
+  "description": "Elixir production quality enforcement hooks",
   "hooks": {
     "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/safety-net.sh",
-            "blocking": true,
-            "description": "Safety-net: Blocks destructive git/filesystem operations (git reset --hard, git push --force, rm -rf outside project, etc.)"
-          }
-        ]
-      },
       {
         "matcher": "Write|Edit",
         "hooks": [
@@ -67,13 +56,10 @@
   },
 
   "environment": {
-    "SAFETY_NET_STRICT": "0",
-    "SAFETY_NET_PARANOID": "0",
     "ELIXIR_VALIDATE_ON_EDIT": "1"
   },
 
   "notes": [
-    "Safety-net blocks destructive operations at PreToolUse stage (before execution)",
     "PreToolUse prompts remind about Elixir best practices before code changes",
     "PostToolUse validation provides immediate feedback (non-blocking warnings)",
     "SessionStart loads all project context (standards, patterns, technical debt)",

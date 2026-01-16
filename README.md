@@ -1,6 +1,6 @@
 # Elixir Production Plugin for Claude Code
 
-A comprehensive Claude Code plugin system for production-quality Elixir development, combining specialized agents, progressive skills, commands, and safety automation.
+A comprehensive Claude Code plugin system for production-quality Elixir development, combining specialized agents, progressive skills, commands, and quality enforcement hooks.
 
 ## Features
 
@@ -45,14 +45,6 @@ A comprehensive Claude Code plugin system for production-quality Elixir developm
 - `/distributed-review` - Analyze distributed systems design
 - `/algorithm-research` - Research cutting-edge algorithms
 - `/cognitive-audit` - Analyze cognitive complexity
-
-### 🛡️ Safety-Net Protection
-
-Blocks destructive operations before execution:
-- `git reset --hard`, `git push --force`, `git clean -f`
-- `rm -rf` outside project directory
-- Destructive database operations
-- Semantic command analysis (not just pattern matching)
 
 ### 🔄 Three Workflow Modes
 
@@ -381,10 +373,6 @@ spike_migration_suggestions: true
 ### Environment Variables
 
 ```bash
-# Safety-net modes
-export SAFETY_NET_STRICT=1      # Fail-closed on unparseable commands
-export SAFETY_NET_PARANOID=1    # Enhanced checks including rm -rf in cwd
-
 # Validation
 export ELIXIR_VALIDATE_ON_EDIT=1  # Validate code on every edit (default: 1)
 ```
@@ -417,29 +405,6 @@ Every commit must pass:
 
 Hooks enforce this automatically. No broken code enters version control.
 
-## Safety-Net Protection
-
-The safety-net blocks destructive operations:
-
-**Git operations**:
-- `git reset --hard/--merge` (destroys work)
-- `git push --force/-f` (rewrites history) - allows `--force-with-lease`
-- `git clean -f` (removes files permanently)
-- `git stash drop/clear` (permanent deletion)
-- `git branch -D` (force delete without merge check)
-- `git checkout --` (discards changes)
-
-**Filesystem operations**:
-- `rm -rf` outside project directory or `/tmp`
-- `find ... -delete`
-- `xargs rm -rf` and `parallel rm -rf`
-
-**Features**:
-- Semantic command analysis (understands intent)
-- Handles nested shell wrappers up to 5 levels
-- Allows safe variants (`--dry-run`, `--force-with-lease`)
-- Blocks before permission system engages
-
 ## Architecture
 
 ### Plugin Structure
@@ -466,10 +431,9 @@ The safety-net blocks destructive operations:
 ├── hooks/
 │   ├── hooks.json               # Hook configuration
 │   └── scripts/
-│       ├── safety-net.sh        # Blocks destructive ops
-│       ├── validate-precommit.sh
-│       ├── check-complexity.sh
-│       └── validate-dependencies.sh
+│       ├── validate-precommit.sh # Code quality validation
+│       ├── check-complexity.sh   # Cognitive complexity checks
+│       └── validate-dependencies.sh # Dependency validation
 └── templates/
     ├── AGENTS.md                # For new projects
     ├── CLAUDE.md                # For new projects
@@ -486,31 +450,26 @@ This plugin incorporates patterns from official Claude Code plugins:
    - Fork-join for specialized review
    - User approval gates between phases
 
-2. **Safety-net integration** (claude-code-safety-net)
-   - PreToolUse hooks block destructive operations
-   - Semantic command analysis
-   - Nested wrapper detection
-
-3. **Confidence-based filtering** (code-reviewer agent)
+2. **Confidence-based filtering** (code-reviewer agent)
    - 80% threshold for reporting
    - Severity categories (Critical 90-100%, Important 80-89%)
    - Signal-to-noise optimization
 
-4. **Test criticality scoring** (pr-test-analyzer)
+3. **Test criticality scoring** (pr-test-analyzer)
    - 1-10 scale based on business impact
    - Focus on critical paths (9-10)
    - Behavioral coverage over line coverage
 
-5. **Tool allowlisting** (commit.md command)
+4. **Tool allowlisting** (commit.md command)
    - Pre-approved operations reduce permission prompts
    - Self-documenting capabilities
 
-6. **Progressive disclosure** (plugin-dev skills)
+5. **Progressive disclosure** (plugin-dev skills)
    - Lean core (~1500-2000 words)
    - Deep references in subdirectories
    - Explicit triggering phrases
 
-7. **Path portability** (universal pattern)
+6. **Path portability** (universal pattern)
    - ${CLAUDE_PLUGIN_ROOT} for all internal paths
    - Cross-installation compatibility
 
@@ -522,7 +481,6 @@ This plugin incorporates patterns from official Claude Code plugins:
 - ✅ Plugin directory structure
 - ✅ plugin.json manifest
 - ✅ Base templates (AGENTS.md, CLAUDE.md, project-learnings.md, spike-debt.md)
-- ✅ Safety-net.sh script
 - ✅ Validation scripts (precommit, complexity, dependencies)
 
 **Phase 2: Essential Agents & Skills**
@@ -547,7 +505,7 @@ This plugin incorporates patterns from official Claude Code plugins:
 
 **Phase 6: Automation**
 - ✅ hooks.json configuration
-- ✅ PreToolUse safety-net
+- ✅ PreToolUse quality reminders
 - ✅ SessionStart context loading
 - ✅ SessionEnd learning suggestions
 
@@ -590,7 +548,7 @@ You can currently use the plugin for:
 ✅ **Feature implementation**: `/feature` provides guided TDD workflow
 ✅ **Code review**: `/review` performs comprehensive analysis
 ✅ **Cognitive complexity analysis**: `/cognitive-audit` analyzes onboarding difficulty and refactoring opportunities
-✅ **Safety protection**: Blocks destructive git/filesystem operations
+✅ **Quality enforcement**: Hooks remind about best practices and validate code changes
 ✅ **Pattern guidance**: elixir-patterns skill provides best practices
 ✅ **Quality standards**: production-quality skill enforces standards
 ✅ **Cognitive clarity**: cognitive-complexity skill applies Ousterhout's philosophy
@@ -695,16 +653,6 @@ mix deps.get
 grep "Styler" .formatter.exs
 ```
 
-### Safety-Net Too Strict
-
-```bash
-# Disable safety-net temporarily (not recommended)
-export SAFETY_NET_STRICT=0
-
-# Or allow specific operations
-# Edit safety-net.sh to customize blocked operations
-```
-
 ## References
 
 ### Elixir Resources
@@ -717,7 +665,6 @@ export SAFETY_NET_STRICT=0
 - [Claude Code Plugin Guide](https://github.com/anthropics/claude-code-plugins)
 - [Official Feature-Dev Plugin](https://github.com/anthropics/claude-code/plugins/feature-dev)
 - [Official PR Review Toolkit](https://github.com/anthropics/claude-code/plugins/pr-review-toolkit)
-- [Safety-Net Implementation](https://github.com/anthropics/claude-code-safety-net)
 
 ### Philosophies
 - Dave Thomas (PragDave): DDD, functional core/imperative shell, YAGNI

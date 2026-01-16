@@ -9,7 +9,7 @@ This document outlines the components that remain to be implemented to complete 
 The plugin currently provides:
 - Core feature workflow (`/feature`, `/precommit`, `/review`)
 - TDD-focused implementation (elixir-architect, elixir-developer, test-designer)
-- Safety-net protection
+- Quality enforcement hooks
 - Essential skills (elixir-patterns, production-quality)
 - Hooks configuration
 - Comprehensive documentation
@@ -427,7 +427,7 @@ Create video/GIF demos:
 - Feature implementation workflow
 - Code review process
 - SPIKE mode and migration
-- Safety-net in action
+- Quality hooks in action
 
 ### Team Onboarding
 
