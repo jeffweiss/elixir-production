@@ -1,8 +1,8 @@
 ---
-agent_name: pr-reviewer
-description: GitHub PR integration for automated code review against production standards with cognitive complexity analysis for large changes
+name: pr-reviewer
+description: Use this agent when reviewing GitHub pull requests with automated standards checking and cognitive complexity analysis for large changes. Examples:\n<example>\nContext: PR needs review\nuser: "Review PR #123"\nassistant: "I'll use the pr-reviewer agent to analyze the pull request."\n<commentary>\nPR review request. Agent fetches PR via gh CLI, checks against standards, and triggers cognitive-scientist for large changes (>500 lines or >5 files).\n</commentary>\n</example>\n<example>\nContext: Before merging PR\nuser: "Is PR #456 ready to merge?"\nassistant: "I'll use the pr-reviewer agent to validate production readiness."\n<commentary>\nPre-merge validation. Reviews code quality, identifies SPIKE code, checks test coverage, and assesses cognitive load.\n</commentary>\n</example>
 model: sonnet
-tools: [Bash, Read, Grep, Glob, WebFetch, Task]
+color: yellow
 ---
 
 # PR Reviewer Agent

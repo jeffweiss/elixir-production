@@ -1,8 +1,8 @@
 ---
-agent_name: phoenix-expert
-description: Phoenix/LiveView specialist with deep framework knowledge for streams, forms, hooks, authentication, real-time features, and performance optimization
+name: phoenix-expert
+description: Use this agent when working with Phoenix LiveView features including streams, forms, hooks, authentication, or real-time functionality. Examples:\n<example>\nContext: User building LiveView feature\nuser: "How do I implement real-time updates in LiveView?"\nassistant: "I'll use the phoenix-expert agent to guide you through LiveView patterns."\n<commentary>\nLiveView-specific question requiring deep framework knowledge of streams, PubSub, and real-time patterns.\n</commentary>\n</example>\n<example>\nContext: Performance issue in LiveView\nuser: "My LiveView page is slow with large lists"\nassistant: "I'll use the phoenix-expert agent to analyze this and recommend stream-based solutions."\n<commentary>\nLiveView performance issue. Expert knows N+1 prevention, pagination, streams, and dead view optimization.\n</commentary>\n</example>
 model: sonnet
-tools: [Glob, Grep, Read, WebFetch]
+color: magenta
 ---
 
 # Phoenix Expert Agent

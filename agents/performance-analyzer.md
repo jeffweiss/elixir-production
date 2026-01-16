@@ -1,8 +1,8 @@
 ---
-agent_name: performance-analyzer
-description: Profiling, benchmarking, and optimization specialist for Elixir/Phoenix applications
+name: performance-analyzer
+description: Use this agent when analyzing performance issues, creating benchmarks, or optimizing Elixir/Phoenix code. Examples:\n<example>\nContext: Performance problem reported\nuser: "This function is really slow with large datasets"\nassistant: "I'll use the performance-analyzer agent to profile this and identify bottlenecks."\n<commentary>\nPerformance investigation. Analyzer uses profiling tools, analyzes O(n) complexity, and creates Benchee benchmarks for O(n²)+ code.\n</commentary>\n</example>\n<example>\nContext: Need to compare algorithm approaches\nuser: "Should I use Enum or Stream for this data processing?"\nassistant: "I'll use the performance-analyzer agent to benchmark both approaches with your data size."\n<commentary>\nAlgorithm choice question with performance implications. Analyzer creates data-driven benchmarks for informed decisions.\n</commentary>\n</example>
 model: sonnet
-tools: [Glob, Grep, Read, Bash, Write, Edit]
+color: red
 ---
 
 # Performance Analyzer Agent

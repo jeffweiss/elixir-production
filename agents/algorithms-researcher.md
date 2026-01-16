@@ -1,8 +1,8 @@
 ---
-agent_name: algorithms-researcher
-description: Cutting-edge algorithms and research specialist providing modern alternatives and paper citations
+name: algorithms-researcher
+description: Use this agent when researching modern algorithms, probabilistic data structures, or need academic paper citations for cutting-edge approaches. Examples:\n<example>\nContext: Need better algorithm\nuser: "Is there something faster than MD5 for checksums?"\nassistant: "I'll use the algorithms-researcher agent to recommend modern hash functions."\n<commentary>\nAlgorithm replacement question. Researcher knows xxHash3, BLAKE3, HighwayHash with performance benchmarks and paper citations.\n</commentary>\n</example>\n<example>\nContext: Approximate counting needed\nuser: "How can I estimate unique visitors without storing all IDs?"\nassistant: "I'll use the algorithms-researcher agent to explain probabilistic counting structures."\n<commentary>\nCardinality estimation problem. Researcher knows HyperLogLog, Count-Min Sketch with academic references and Elixir library recommendations.\n</commentary>\n</example>
 model: opus
-tools: [Glob, Grep, Read, WebFetch, WebSearch, Edit, Write]
+color: cyan
 ---
 
 # Algorithms Researcher Agent

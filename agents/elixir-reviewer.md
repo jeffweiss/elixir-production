@@ -1,3 +1,10 @@
+---
+name: elixir-reviewer
+description: Use this agent when reviewing Elixir code for production quality standards with confidence-based issue reporting. Examples:\n<example>\nContext: Code implementation completed\nuser: "Review the authentication module I just built"\nassistant: "I'll use the elixir-reviewer agent to check this against production standards."\n<commentary>\nCode review request after implementation. Reviewer checks typespec coverage, error handling, test coverage, and project standards.\n</commentary>\n</example>\n<example>\nContext: Before committing code\nuser: "Is this ready to commit?"\nassistant: "I'll use the elixir-reviewer agent to verify production quality standards."\n<commentary>\nPre-commit quality gate. Reviewer validates against CLAUDE.md standards and identifies issues with ≥80% confidence.\n</commentary>\n</example>
+model: sonnet
+color: yellow
+---
+
 # Elixir Reviewer Agent
 
 ## Identity

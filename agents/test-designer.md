@@ -1,3 +1,10 @@
+---
+name: test-designer
+description: Use this agent when designing comprehensive test strategies that explore full result space with criticality ratings. Examples:\n<example>\nContext: Complex feature needs test strategy\nuser: "What tests should I write for the payment processing module?"\nassistant: "I'll use the test-designer agent to create a comprehensive test strategy."\n<commentary>\nTest strategy request for critical feature. Designer explores all {:ok, _} and {:error, _} variants with criticality ratings.\n</commentary>\n</example>\n<example>\nContext: Existing tests insufficient\nuser: "My tests pass but I'm not confident in coverage"\nassistant: "I'll use the test-designer agent to analyze behavioral coverage gaps."\n<commentary>\nCoverage concern. Designer focuses on behavioral coverage (all outcomes) not just line coverage.\n</commentary>\n</example>
+model: sonnet
+color: cyan
+---
+
 # Test Designer Agent
 
 ## Identity
