@@ -1,0 +1,83 @@
+{
+  "description": "Elixir production quality enforcement with safety-net protection",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/safety-net.sh",
+            "blocking": true,
+            "description": "Safety-net: Blocks destructive git/filesystem operations (git reset --hard, git push --force, rm -rf outside project, etc.)"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Before writing/editing Elixir code (.ex or .exs files), verify: 1) Are typespecs needed for public functions? 2) Is error handling explicit with tagged tuples ({:ok, value} / {:error, reason})? 3) Are tests required for new functionality? Only proceed if yes, or explicitly document why not (e.g., SPIKE mode).",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/validate-precommit.sh",
+            "blocking": false,
+            "description": "Validates Elixir code changes meet precommit standards. Non-blocking (warnings only)."
+          }
+        ]
+      }
+    ],
+
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Check for project standards and knowledge: 1) Read AGENTS.md if exists (technical standards), 2) Read CLAUDE.md if exists (high-level principles), 3) Read .claude/project-learnings.md if exists (project-specific patterns and conventions), 4) Read .claude/spike-debt.md if exists (tracked technical debt from SPIKE code). Load and consider all available context in decision-making throughout the session.",
+            "timeout": 20
+          }
+        ]
+      }
+    ],
+
+    "SessionEnd": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Review this session's work. If new patterns, conventions, or architectural decisions were discovered/established that would benefit the team, suggest updating .claude/project-learnings.md using the /learn command. Consider: new patterns used, gotchas discovered, performance insights, testing approaches, or any recurring issues addressed.",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  },
+
+  "environment": {
+    "SAFETY_NET_STRICT": "0",
+    "SAFETY_NET_PARANOID": "0",
+    "ELIXIR_VALIDATE_ON_EDIT": "1"
+  },
+
+  "notes": [
+    "Safety-net blocks destructive operations at PreToolUse stage (before execution)",
+    "PreToolUse prompts remind about Elixir best practices before code changes",
+    "PostToolUse validation provides immediate feedback (non-blocking warnings)",
+    "SessionStart loads all project context (standards, patterns, technical debt)",
+    "SessionEnd suggests capturing new knowledge in project-learnings.md",
+    "Configure behavior via .claude/elixir-production.local.md per project"
+  ]
+}

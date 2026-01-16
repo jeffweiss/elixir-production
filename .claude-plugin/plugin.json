@@ -1,0 +1,165 @@
+{
+  "name": "elixir-production",
+  "version": "1.0.0",
+  "description": "Production-quality Elixir development system with specialized agents, progressive skills, and comprehensive workflows for enterprise maintenance, production prototyping, and rapid experimentation",
+  "author": "Jeff Weiss",
+  "homepage": "https://github.com/jeffweiss/elixir-production",
+  "keywords": [
+    "elixir",
+    "phoenix",
+    "liveview",
+    "production",
+    "quality",
+    "tdd",
+    "distributed-systems",
+    "algorithms",
+    "cognitive-complexity"
+  ],
+  "agents": [
+    {
+      "name": "elixir-architect",
+      "description": "High-quality feature design with architectural decisions and complexity analysis (Opus)",
+      "path": "${CLAUDE_PLUGIN_ROOT}/agents/elixir-architect.md"
+    },
+    {
+      "name": "elixir-developer",
+      "description": "Primary TDD-focused implementation worker (Sonnet)",
+      "path": "${CLAUDE_PLUGIN_ROOT}/agents/elixir-developer.md"
+    },
+    {
+      "name": "elixir-reviewer",
+      "description": "Code review against production standards with confidence-based reporting",
+      "path": "${CLAUDE_PLUGIN_ROOT}/agents/elixir-reviewer.md"
+    },
+    {
+      "name": "phoenix-expert",
+      "description": "Phoenix/LiveView specialist with deep framework knowledge",
+      "path": "${CLAUDE_PLUGIN_ROOT}/agents/phoenix-expert.md"
+    },
+    {
+      "name": "test-designer",
+      "description": "Comprehensive test strategy exploring entire result space with criticality scoring",
+      "path": "${CLAUDE_PLUGIN_ROOT}/agents/test-designer.md"
+    },
+    {
+      "name": "performance-analyzer",
+      "description": "Profiling, benchmarking, and optimization specialist",
+      "path": "${CLAUDE_PLUGIN_ROOT}/agents/performance-analyzer.md"
+    },
+    {
+      "name": "pr-reviewer",
+      "description": "GitHub PR integration and automated code review",
+      "path": "${CLAUDE_PLUGIN_ROOT}/agents/pr-reviewer.md"
+    },
+    {
+      "name": "distributed-systems-expert",
+      "description": "Distributed systems specialist covering consensus algorithms and subtle distributed bugs (Opus)",
+      "path": "${CLAUDE_PLUGIN_ROOT}/agents/distributed-systems-expert.md"
+    },
+    {
+      "name": "algorithms-researcher",
+      "description": "Cutting-edge algorithms and research specialist (Opus)",
+      "path": "${CLAUDE_PLUGIN_ROOT}/agents/algorithms-researcher.md"
+    },
+    {
+      "name": "cognitive-scientist",
+      "description": "Code complexity and onboarding analysis based on Ousterhout philosophy (Opus)",
+      "path": "${CLAUDE_PLUGIN_ROOT}/agents/cognitive-scientist.md"
+    }
+  ],
+  "skills": [
+    {
+      "name": "elixir-patterns",
+      "description": "Core Elixir patterns: railway-oriented programming, DDD, functional core/imperative shell, OTP, pattern matching",
+      "path": "${CLAUDE_PLUGIN_ROOT}/skills/elixir-patterns"
+    },
+    {
+      "name": "phoenix-liveview",
+      "description": "Phoenix LiveView patterns: streams, forms, hooks, authentication, real-time features, common gotchas",
+      "path": "${CLAUDE_PLUGIN_ROOT}/skills/phoenix-liveview"
+    },
+    {
+      "name": "production-quality",
+      "description": "Production quality standards: typespecs, error handling, testing strategies, precommit workflows, documentation",
+      "path": "${CLAUDE_PLUGIN_ROOT}/skills/production-quality"
+    },
+    {
+      "name": "distributed-systems",
+      "description": "Distributed systems patterns: consensus algorithms (Paxos, Raft, Multi-Raft), clustering, CAP tradeoffs, common bugs",
+      "path": "${CLAUDE_PLUGIN_ROOT}/skills/distributed-systems"
+    },
+    {
+      "name": "algorithms",
+      "description": "Modern algorithms and data structures from recent research: probabilistic structures, cache-efficient algorithms, cutting-edge approaches",
+      "path": "${CLAUDE_PLUGIN_ROOT}/skills/algorithms"
+    },
+    {
+      "name": "cognitive-complexity",
+      "description": "Cognitive load analysis based on Ousterhout's philosophy: deep modules, reducing complexity, strategic programming",
+      "path": "${CLAUDE_PLUGIN_ROOT}/skills/cognitive-complexity"
+    }
+  ],
+  "commands": [
+    {
+      "name": "precommit",
+      "description": "Run full precommit quality checks (compile, format, credo, test)",
+      "path": "${CLAUDE_PLUGIN_ROOT}/commands/precommit.md"
+    },
+    {
+      "name": "feature",
+      "description": "Guided feature implementation with architecture planning and parallel exploration",
+      "path": "${CLAUDE_PLUGIN_ROOT}/commands/feature.md"
+    },
+    {
+      "name": "review",
+      "description": "Comprehensive code review against production standards",
+      "path": "${CLAUDE_PLUGIN_ROOT}/commands/review.md"
+    },
+    {
+      "name": "spike",
+      "description": "Rapid prototyping mode for experiments",
+      "path": "${CLAUDE_PLUGIN_ROOT}/commands/spike.md"
+    },
+    {
+      "name": "spike-migrate",
+      "description": "Migrate SPIKE code to production quality",
+      "path": "${CLAUDE_PLUGIN_ROOT}/commands/spike-migrate.md"
+    },
+    {
+      "name": "benchmark",
+      "description": "Create or run Benchee benchmarks",
+      "path": "${CLAUDE_PLUGIN_ROOT}/commands/benchmark.md"
+    },
+    {
+      "name": "pr-review",
+      "description": "Review a GitHub PR against standards",
+      "path": "${CLAUDE_PLUGIN_ROOT}/commands/pr-review.md"
+    },
+    {
+      "name": "learn",
+      "description": "Document patterns in project-learnings.md",
+      "path": "${CLAUDE_PLUGIN_ROOT}/commands/learn.md"
+    },
+    {
+      "name": "distributed-review",
+      "description": "Analyze distributed system design and correctness",
+      "path": "${CLAUDE_PLUGIN_ROOT}/commands/distributed-review.md"
+    },
+    {
+      "name": "algorithm-research",
+      "description": "Research state-of-the-art algorithms for a problem",
+      "path": "${CLAUDE_PLUGIN_ROOT}/commands/algorithm-research.md"
+    },
+    {
+      "name": "cognitive-audit",
+      "description": "Analyze code cognitive load and onboarding difficulty",
+      "path": "${CLAUDE_PLUGIN_ROOT}/commands/cognitive-audit.md"
+    }
+  ],
+  "hooks": {
+    "path": "${CLAUDE_PLUGIN_ROOT}/hooks/hooks.json"
+  },
+  "requirements": {
+    "claude_code_version": ">=0.1.0"
+  }
+}
