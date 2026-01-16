@@ -137,7 +137,9 @@ The plugin currently provides:
 
 ---
 
-### cognitive-scientist Agent
+### ✅ cognitive-scientist Agent (COMPLETED)
+
+**Status**: Implemented in v1.1.0
 
 **Purpose**: Analyze cognitive load, code comprehension, and onboarding difficulty
 
@@ -153,13 +155,13 @@ The plugin currently provides:
 - Generate onboarding guides
 - Explicitly avoid "Clean Code" dogma
 
-**File**: `agents/cognitive-scientist.md`
+**File**: `agents/cognitive-scientist.md` ✅
 
 **Tools**: Glob, Grep, Read, Edit, TodoWrite, WebFetch
 
 **Model**: Opus (deep analysis required)
 
-**Command**: `/cognitive-audit`
+**Command**: `/cognitive-audit` ✅
 
 **Integration**: Auto-triggered by pr-reviewer for large PRs (>500 lines or >5 files)
 
@@ -298,7 +300,9 @@ The plugin currently provides:
 
 ---
 
-### /cognitive-audit Command
+### ✅ /cognitive-audit Command (COMPLETED)
+
+**Status**: Implemented in v1.1.0
 
 **Purpose**: Analyze code cognitive load and onboarding difficulty
 
@@ -310,11 +314,11 @@ The plugin currently provides:
 - Generate cognitive complexity report
 - Create onboarding guide
 
-**File**: `commands/cognitive-audit.md`
+**File**: `commands/cognitive-audit.md` ✅
 
 **Model**: Opus
 
-**Dependencies**: Requires cognitive-scientist agent
+**Dependencies**: Requires cognitive-scientist agent ✅
 
 ---
 
@@ -386,9 +390,11 @@ The plugin currently provides:
 
 ---
 
-### cognitive-complexity Skill
+### ✅ cognitive-complexity Skill (COMPLETED)
 
-**File**: `skills/cognitive-complexity/SKILL.md`
+**Status**: Implemented in v1.1.0
+
+**File**: `skills/cognitive-complexity/SKILL.md` ✅
 
 **Philosophy**: John Ousterhout's "A Philosophy of Software Design"
 
@@ -401,9 +407,9 @@ The plugin currently provides:
 - Onboarding difficulty assessment
 - Explicitly avoid Clean Code dogma
 
-**References**:
+**References**: ✅
 - `references/metrics.md` - Cognitive complexity metrics
-- `references/patterns.md` - Clarity patterns
+- `references/patterns.md` - Clarity patterns (refactoring catalog)
 - `references/onboarding.md` - Reducing learning curve
 
 ---
@@ -562,11 +568,17 @@ When implementing remaining components:
 
 ## Current Version
 
-**v1.0.0** - Minimal Working System (Complete)
+**v1.1.0** - Cognitive Complexity Analysis (Complete)
 
-Ready for use with core workflows: feature implementation, code review, precommit checks.
+Adds cognitive complexity analysis with Ousterhout's philosophy:
+- cognitive-scientist agent (Opus) - Deep cognitive analysis
+- cognitive-complexity skill - Ousterhout principles, metrics, patterns
+- /cognitive-audit command - Full cognitive complexity reports
+- Onboarding difficulty assessment and refactoring recommendations
 
-**Next Release**: v1.1.0 - Phoenix Support (phoenix-expert + phoenix-liveview skill)
+Ready for use with: feature implementation, code review, precommit checks, cognitive complexity analysis.
+
+**Next Release**: v1.2.0 - Phoenix Support (phoenix-expert + phoenix-liveview skill)
 **Target**: v2.0.0 - Complete System (all agents, skills, commands)
 
 ---

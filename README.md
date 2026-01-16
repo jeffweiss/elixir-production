@@ -535,10 +535,15 @@ This plugin incorporates patterns from official Claude Code plugins:
 - ✅ elixir-developer agent (Sonnet)
 - ✅ test-designer agent
 
+**Phase 4.5: Expert Consultant Agents**
+- ✅ cognitive-scientist agent (Opus)
+- ✅ cognitive-complexity skill
+
 **Phase 5: Essential Commands**
 - ✅ /precommit command
 - ✅ /feature command
 - ✅ /review command
+- ✅ /cognitive-audit command
 
 **Phase 6: Automation**
 - ✅ hooks.json configuration
@@ -556,7 +561,6 @@ This plugin incorporates patterns from official Claude Code plugins:
 **Phase 4.5: Expert Consultant Agents (Opus)**
 - ⏳ distributed-systems-expert agent
 - ⏳ algorithms-researcher agent
-- ⏳ cognitive-scientist agent
 
 **Phase 5: Remaining Commands**
 - ⏳ /spike command
@@ -566,13 +570,11 @@ This plugin incorporates patterns from official Claude Code plugins:
 - ⏳ /learn command
 - ⏳ /distributed-review command
 - ⏳ /algorithm-research command
-- ⏳ /cognitive-audit command
 
 **Skills**
 - ⏳ phoenix-liveview skill
 - ⏳ distributed-systems skill
 - ⏳ algorithms skill
-- ⏳ cognitive-complexity skill
 
 **Phase 7: Documentation**
 - ⏳ Video/GIF demos
@@ -587,11 +589,13 @@ You can currently use the plugin for:
 ✅ **Precommit quality gate**: `/precommit` runs all checks
 ✅ **Feature implementation**: `/feature` provides guided TDD workflow
 ✅ **Code review**: `/review` performs comprehensive analysis
+✅ **Cognitive complexity analysis**: `/cognitive-audit` analyzes onboarding difficulty and refactoring opportunities
 ✅ **Safety protection**: Blocks destructive git/filesystem operations
 ✅ **Pattern guidance**: elixir-patterns skill provides best practices
 ✅ **Quality standards**: production-quality skill enforces standards
+✅ **Cognitive clarity**: cognitive-complexity skill applies Ousterhout's philosophy
 
-The system is **functional** for core workflows but lacks some advanced features (phoenix-expert, performance-analyzer, SPIKE mode, etc.).
+The system is **functional** for core workflows including cognitive complexity analysis. Still lacks some features (phoenix-expert, performance-analyzer, SPIKE mode, distributed-systems/algorithms experts).
 
 ## Contributing
 
