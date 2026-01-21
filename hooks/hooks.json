@@ -38,18 +38,6 @@
           }
         ]
       }
-    ],
-
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/session-end.sh",
-            "timeout": 5
-          }
-        ]
-      }
     ]
   },
 
@@ -61,7 +49,6 @@
     "PreToolUse prompts remind about Elixir best practices before code changes (only .ex/.exs files)",
     "PostToolUse validation provides immediate feedback for Elixir files (non-blocking warnings)",
     "SessionStart loads all project context (standards, patterns, technical debt)",
-    "SessionEnd suggests capturing new knowledge in project-learnings.md",
     "Configure behavior via .claude/elixir-production.local.md per project"
   ]
 }
