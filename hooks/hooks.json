@@ -32,8 +32,9 @@
       {
         "hooks": [
           {
-            "type": "prompt",
-            "prompt": "Check for project standards and knowledge: 1) Read AGENTS.md if exists (technical standards), 2) Read CLAUDE.md if exists (high-level principles), 3) Read .claude/project-learnings.md if exists (project-specific patterns and conventions), 4) Read .claude/spike-debt.md if exists (tracked technical debt from SPIKE code). Load and consider all available context in decision-making throughout the session."
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/session-start.sh",
+            "timeout": 10
           }
         ]
       }
@@ -43,8 +44,9 @@
       {
         "hooks": [
           {
-            "type": "prompt",
-            "prompt": "Review this session's work. If new patterns, conventions, or architectural decisions were discovered/established that would benefit the team, suggest updating .claude/project-learnings.md using the /learn command. Consider: new patterns used, gotchas discovered, performance insights, testing approaches, or any recurring issues addressed."
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/session-end.sh",
+            "timeout": 5
           }
         ]
       }
