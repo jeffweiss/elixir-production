@@ -108,7 +108,7 @@ fi
 # Check 7: Hook scripts
 echo -n "7. Hook scripts... "
 missing_scripts=()
-for script in safety-net.sh validate-precommit.sh check-complexity.sh validate-dependencies.sh; do
+for script in validate-precommit.sh check-complexity.sh validate-dependencies.sh; do
   if [[ ! -f ~/.claude/plugins/elixir-production/hooks/scripts/${script} ]]; then
     missing_scripts+=("$script")
   elif [[ ! -x ~/.claude/plugins/elixir-production/hooks/scripts/${script} ]]; then

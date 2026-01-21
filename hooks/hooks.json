@@ -3,11 +3,11 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Write|Edit",
+        "matcher": "Write:*.ex|Write:*.exs|Edit:*.ex|Edit:*.exs",
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Before writing/editing Elixir code (.ex or .exs files), verify: 1) Are typespecs needed for public functions? 2) Is error handling explicit with tagged tuples ({:ok, value} / {:error, reason})? 3) Are tests required for new functionality? Only proceed if yes, or explicitly document why not (e.g., SPIKE mode).",
+            "prompt": "Before writing/editing this Elixir code, verify: 1) Are typespecs needed for public functions? 2) Is error handling explicit with tagged tuples ({:ok, value} / {:error, reason})? 3) Are tests required for new functionality? Only proceed if yes, or explicitly document why not (e.g., SPIKE mode).",
             "timeout": 30
           }
         ]
@@ -16,11 +16,11 @@
 
     "PostToolUse": [
       {
-        "matcher": "Edit|Write",
+        "matcher": "Edit:*.ex|Edit:*.exs|Write:*.ex|Write:*.exs",
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/validate-precommit.sh",
+            "command": "./hooks/scripts/validate-precommit.sh",
             "blocking": false,
             "description": "Validates Elixir code changes meet precommit standards. Non-blocking (warnings only)."
           }
@@ -60,8 +60,8 @@
   },
 
   "notes": [
-    "PreToolUse prompts remind about Elixir best practices before code changes",
-    "PostToolUse validation provides immediate feedback (non-blocking warnings)",
+    "PreToolUse prompts remind about Elixir best practices before code changes (only .ex/.exs files)",
+    "PostToolUse validation provides immediate feedback for Elixir files (non-blocking warnings)",
     "SessionStart loads all project context (standards, patterns, technical debt)",
     "SessionEnd suggests capturing new knowledge in project-learnings.md",
     "Configure behavior via .claude/elixir-production.local.md per project"
