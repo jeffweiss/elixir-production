@@ -1,11 +1,13 @@
 ---
 name: algorithms
-description: Use when researching algorithms, data structures, optimization, performance, or need modern alternatives to classic algorithms
+description: Use when choosing data structures (OTP built-ins, Okasaki-style functional structures, probabilistic), evaluating hash functions, needing cache-efficient or modern sorting algorithms, or comparing classic vs modern algorithmic approaches for Elixir
 ---
 
 # Modern Algorithms and Data Structures
 
 ## Overview
+
+**Type:** Pattern + Reference
 
 This skill provides comprehensive guidance on modern algorithms and data structures from recent computer science research, with focus on practical Elixir implementations. Modern algorithms often provide significant performance improvements over classic approaches through better cache utilization, parallelization, and probabilistic techniques.
 
@@ -19,6 +21,97 @@ Use this skill when:
 - Assessing implementation complexity vs performance gains
 - Working with large-scale data requiring approximate solutions
 - Implementing distributed system algorithms
+
+## Data Structure Selection
+
+### Prefer OTP Built-In Data Structures First
+
+Before reaching for external libraries, use what Erlang/OTP already provides. These are battle-tested, zero-dependency, and optimized for the BEAM.
+
+| Module | Structure | Use When |
+|--------|-----------|----------|
+| `:queue` | Double-ended FIFO queue | Need O(1) enqueue/dequeue from both ends; BFS traversals; producer-consumer buffers |
+| `:gb_trees` | General balanced trees | Need ordered key-value store with O(log n) operations; range queries |
+| `:gb_sets` | General balanced sets | Need ordered unique collection with O(log n) membership, union, intersection |
+| `:ordsets` | Ordered list sets | Small sets (<100 elements) needing sorted iteration; simple ordered membership |
+| `:orddict` | Ordered list dicts | Small key-value maps (<50 keys) needing sorted keys |
+| `:sets` | Hash sets (OTP 24+) | Unordered unique collection; faster than `:gb_sets` for large sets without ordering needs |
+| `:digraph` | Mutable directed graph | Graph algorithms (shortest path, topological sort, cycles); note: uses ETS, not purely functional |
+| `:array` | Functional sparse array | Integer-indexed data with gaps; default values for missing indices |
+| `:atomics` | Lock-free integer array | Concurrent counters, flags; shared mutable state without process bottleneck |
+| `:counters` | Concurrent counters | High-throughput counting; write-optimized (less read accuracy than `:atomics`) |
+
+```elixir
+# :queue — O(1) operations from both ends
+q = :queue.new()
+q = :queue.in(:first, q)
+q = :queue.in(:second, q)
+{{:value, :first}, q} = :queue.out(q)
+
+# :gb_trees — ordered key-value with range operations
+tree = :gb_trees.empty()
+tree = :gb_trees.insert("alice", 1, tree)
+tree = :gb_trees.insert("bob", 2, tree)
+{_key, _val, _iter} = :gb_trees.next(:gb_trees.iterator(tree))
+
+# :array — sparse functional array with defaults
+arr = :array.new(default: 0)
+arr = :array.set(5, :hello, arr)
+:hello = :array.get(5, arr)
+0 = :array.get(99, arr)  # returns default
+```
+
+**When to use OTP structures over Elixir's Map/MapSet/List:**
+- `:queue` when you need FIFO semantics (lists are O(n) for dequeue from tail)
+- `:gb_trees` when you need ordered traversal or range queries (maps are unordered)
+- `:gb_sets` when you need sorted set operations (MapSet is unordered)
+- `:digraph` when solving graph problems (adjacency lists are verbose to manage)
+- `:atomics`/`:counters` when concurrent processes update shared counters (GenServer bottleneck)
+
+### Purely Functional Data Structures (Okasaki)
+
+Chris Okasaki's "Purely Functional Data Structures" (1998, based on his 1996 PhD thesis) established the foundational techniques for efficient immutable data structures. Elixir's immutable model means these structures are directly applicable — and some are already embedded in the BEAM.
+
+**Key Okasaki techniques relevant to Elixir:**
+
+**Amortized analysis with lazy evaluation** — `:queue` uses Okasaki's banker's method: two lists (front and back) with lazy reversal, giving amortized O(1) for all operations. This is why `:queue` exists — naive list-based queues are O(n) for dequeue.
+
+**Persistent balanced trees** — `:gb_trees` and `:gb_sets` are persistent (old versions remain valid after updates) with O(log n) operations. Structural sharing means updates copy only the path from root to modified node.
+
+**When to think about Okasaki-style structures:**
+
+| Situation | Consider |
+|-----------|----------|
+| Need O(1) queue operations | `:queue` (already Okasaki-derived) |
+| Need priority queue/heap | Pairing heap or leftist heap — no OTP built-in; consider `heap` library |
+| Need finger tree (deque + split + concatenate) | Rare in practice; consider if you need all three operations together |
+| Need persistent vector with O(log32 n) indexed access | Erlang's `:array` covers most cases; for truly large indexed collections, consider HAMTs (already used internally by Elixir maps) |
+| Snapshotting state for undo/audit | Persistent structures give this for free — the old version is still valid |
+
+```elixir
+# Persistent structures: old versions survive updates
+tree1 = :gb_trees.insert("a", 1, :gb_trees.empty())
+tree2 = :gb_trees.insert("b", 2, tree1)
+# tree1 still contains only "a" — useful for snapshots, undo, audit trails
+
+# Priority queue via pairing heap (add {:heap, "~> 3.0"} to deps)
+heap = Heap.new(&</=/2)  # min-heap
+heap = heap |> Heap.push(5) |> Heap.push(1) |> Heap.push(3)
+{1, heap} = Heap.split(heap)  # O(1) find-min, O(log n) amortized delete-min
+```
+
+**What Elixir already gives you from Okasaki's world (without you knowing it):**
+- **Maps** use HAMTs (Hash Array Mapped Tries) internally — persistent with structural sharing
+- **Lists** are classic cons-cells with O(1) prepend
+- **MapSet** wraps Map — same HAMT benefits
+- `:queue` uses Okasaki's paired-list technique
+
+**When NOT to reach for Okasaki structures:**
+- If Map, MapSet, or a plain list solves the problem — don't add complexity
+- If you need mutable shared state — use ETS or `:atomics` instead
+- If the collection is small (<1000 elements) — algorithmic constant factors dominate, and simpler structures win
+
+**Reference**: Okasaki, Chris. "Purely Functional Data Structures." Cambridge University Press, 1998. (Based on PhD thesis, Carnegie Mellon University, 1996.)
 
 ## Core Concepts
 
@@ -596,11 +689,15 @@ end
 
 | Use Case | Modern Algorithm | Classic Alternative | When to Switch |
 |----------|------------------|---------------------|----------------|
+| **FIFO Queue** | `:queue` (OTP) | List as queue | Always — O(1) vs O(n) dequeue |
+| **Ordered key-value** | `:gb_trees` (OTP) | Sorted list of tuples | >50 elements |
+| **Priority Queue** | Pairing heap (`heap` lib) | Sorted list | >100 elements or frequent insert+extract-min |
 | **Hashing (non-crypto)** | xxHash3 | MD5, SHA1 | Always - 60× faster |
 | **Hashing (crypto)** | BLAKE3 | SHA-256 | When performance critical |
 | **Unique Counting** | HyperLogLog | MapSet/exact count | >100K unique items |
 | **Membership Testing** | Cuckoo Filter | Bloom Filter | Need deletion support |
 | **Frequency Estimation** | Count-Min Sketch | Map counter | Millions of items |
+| **Concurrent Counters** | `:atomics`/`:counters` (OTP) | GenServer with state | Multiple writers, high throughput |
 | **Sorting Large Data** | BlockQuicksort | Standard quicksort | >10K items on modern CPU |
 | **Sorting with Patterns** | pdqsort | Quicksort | Data has patterns |
 | **Matrix Multiplication** | Cache-oblivious | Naive O(n³) | Large matrices (>1000×1000) |
@@ -696,6 +793,40 @@ filter = CuckooFilter.delete(filter, "cached_item")  # Works!
 ```
 
 **When to fix**: Cache tracking, rate limiting with expiration, any scenario requiring deletion.
+
+### Using Lists as Queues
+
+**Problem**: Lists are O(n) for operations at the tail, making them poor queues.
+
+```elixir
+# ❌ O(n) - appending to list tail
+queue = queue ++ [new_item]
+
+# ❌ O(n) - reversing to dequeue
+[head | rest] = Enum.reverse(queue)
+
+# ✅ O(1) amortized - :queue handles both ends efficiently
+q = :queue.in(new_item, q)
+{{:value, item}, q} = :queue.out(q)
+```
+
+**When to fix**: Any FIFO buffer, BFS traversal, or producer-consumer pattern.
+
+### Using GenServer for Shared Counters
+
+**Problem**: GenServer becomes a bottleneck when many processes update a counter.
+
+```elixir
+# ❌ BOTTLENECK - all updates serialized through one process
+GenServer.call(CounterServer, {:increment, key})
+
+# ✅ LOCK-FREE - concurrent updates without process bottleneck
+ref = :atomics.new(1, signed: false)
+:atomics.add(ref, 1, 1)  # increment index 1
+:atomics.get(ref, 1)      # read current value
+```
+
+**When to fix**: Metrics, rate limiting, or any counter updated by many concurrent processes.
 
 ### Naive Sorting on Modern Hardware
 

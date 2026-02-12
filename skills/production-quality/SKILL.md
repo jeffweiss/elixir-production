@@ -1,11 +1,215 @@
 ---
 name: production-quality
-description: Use when preparing for production deployment, conducting code reviews, setting up precommit workflows, adding type specifications, implementing testing strategies, addressing security concerns, or ensuring documentation quality and best practices
+description: Use when looking up typespec syntax, security checklists (SQL injection, XSS, input validation), testing patterns (property-based, integration, TDD), or documentation standards for Elixir modules and functions
 ---
 
 # Production Quality Skill
 
+**Type:** Reference
+
 This skill provides comprehensive knowledge of production-quality standards, workflows, and best practices for Elixir development. It covers precommit workflows, testing strategies, type specifications, documentation requirements, and security considerations.
+
+## Production Readiness Escalation Ladder
+
+Start at the top. Each level builds on the previous — don't skip ahead.
+
+### Level 0: It Compiles Cleanly
+
+The absolute minimum. Zero warnings, zero errors.
+
+| Check | Command | What It Catches |
+|-------|---------|-----------------|
+| Compilation | `mix compile --warnings-as-errors` | Syntax errors, undefined functions, unused variables, type mismatches |
+
+```elixir
+# ❌ Warning: variable "context" is unused
+def process(user, context), do: user.name
+
+# ✅ Prefix unused vars with underscore
+def process(user, _context), do: user.name
+```
+
+**This level means**: The code runs. Nothing more.
+
+**Move to Level 1 when**: Code compiles. Always.
+
+### Level 1: Consistent Formatting
+
+Automated, zero-debate style. Run once, never think about it again.
+
+| Check | Command | What It Does |
+|-------|---------|--------------|
+| Format + Styler | `mix format` | Consistent style, sorted aliases/imports, simplified pipes |
+
+**Required** `.formatter.exs`:
+```elixir
+[
+  plugins: [Styler],
+  inputs: ["*.{ex,exs}", "{config,lib,test}/**/*.{ex,exs}"],
+  line_length: 98
+]
+```
+
+**This level means**: Any developer can read any file without style friction.
+
+**Move to Level 2 when**: Code is formatted. Always.
+
+### Level 2: Static Analysis Passes
+
+Catch common mistakes, naming issues, and anti-patterns before tests run.
+
+| Check | Command | What It Catches |
+|-------|---------|-----------------|
+| Credo strict mode | `mix credo --strict` | Naming inconsistencies, long functions, missing moduledocs, duplicated code, design anti-patterns |
+
+| Common Credo Issue | Fix |
+|-------------------|-----|
+| Function too long (>40 lines) | Extract with `with` or helper functions |
+| Module missing `@moduledoc` | Add module documentation or `@moduledoc false` for internal modules |
+| Nested `if`/`case` | Flatten with pattern matching or `with` |
+| Single-pipe `\|>` | Remove pipe, use direct function call |
+
+**This level means**: Code follows community conventions and avoids common pitfalls.
+
+**Move to Level 3 when**: No Credo warnings. Always.
+
+### Level 3: Tested
+
+Confidence that the code works — and keeps working when changed.
+
+| Test Type | Proportion | Speed | What It Covers |
+|-----------|-----------|-------|----------------|
+| Unit tests | ~70% | <1ms each | Pure functions, business logic, edge cases |
+| Integration tests | ~25% | <100ms each | Database operations, context functions, Mox-ed external services |
+| E2E tests | ~5% | Seconds | LiveView flows, full API request/response |
+| Property-based | As needed | Varies | Invariants across random input (StreamData) |
+
+| Test Quality Check | Standard |
+|-------------------|----------|
+| All `{:ok, _}` paths tested | Required |
+| All `{:error, _}` paths tested | Required |
+| Edge cases (empty, nil, boundary values) | Required |
+| Descriptive test names | `"returns error when email already exists"` not `"test email"` |
+| Async when no shared state | `use MyApp.DataCase, async: true` |
+
+```elixir
+# Cover the full result space
+describe "create_user/1" do
+  test "creates user with valid attributes" do
+    assert {:ok, %User{}} = Accounts.create_user(valid_attrs())
+  end
+
+  test "returns error with invalid email" do
+    assert {:error, changeset} = Accounts.create_user(%{email: "bad"})
+    assert "invalid format" in errors_on(changeset).email
+  end
+
+  test "returns error with duplicate email" do
+    insert(:user, email: "taken@example.com")
+    assert {:error, changeset} = Accounts.create_user(%{email: "taken@example.com"})
+    assert "has already been taken" in errors_on(changeset).email
+  end
+end
+```
+
+**This level means**: You can refactor with confidence. Regressions are caught.
+
+**Move to Level 4 when**: Tests cover all happy and error paths.
+
+### Level 4: Typed
+
+Type specifications on all public functions. Catches interface misunderstandings at boundaries.
+
+| Standard | Example |
+|----------|---------|
+| `@spec` on every public function | `@spec get_user(integer()) :: {:ok, User.t()} \| {:error, :not_found}` |
+| Custom `@type` for complex structures | `@type create_attrs :: %{required(:name) => String.t(), ...}` |
+| Concrete types, not `any()` or `term()` | `String.t()` not `any()`, `User.t()` not `map()` |
+| All error cases included in spec | Don't omit `:error` variants |
+| Schema modules define `t()` type | `@type t :: %__MODULE__{name: String.t(), ...}` |
+
+```elixir
+@type create_result :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
+
+@spec create_user(%{required(:name) => String.t(), required(:email) => String.t()}) ::
+        create_result()
+def create_user(attrs) do
+  %User{}
+  |> User.changeset(attrs)
+  |> Repo.insert()
+end
+```
+
+**This level means**: Another developer can use your module without reading its implementation.
+
+**Move to Level 5 when**: All public APIs have specs.
+
+### Level 5: Secure
+
+Defend against the OWASP top 10 relevant to Elixir/Phoenix.
+
+| Threat | Defense | Elixir Mechanism |
+|--------|---------|-----------------|
+| SQL injection | Parameterized queries | Ecto queries with `^variable` — never string interpolation |
+| XSS | Auto-escaped output | HEEx `<%= %>` escapes by default; avoid `raw/1` |
+| Unvalidated input | Changeset validation at every boundary | `cast/3` → `validate_required/2` → `validate_format/3` |
+| Mass assignment | Explicit field allowlists | `cast(struct, params, [:allowed, :fields])` — not `Map.merge` |
+| Insecure secrets | Runtime env vars | `System.get_env("SECRET")` in `runtime.exs` — never in source |
+| Missing auth checks | Router scopes + context checks | `pipe_through [:require_authenticated_user]` + per-action authorization |
+| Timing attacks | Constant-time comparison | `Plug.Crypto.secure_compare/2` for tokens; Argon2/Bcrypt for passwords |
+
+**This level means**: The app is defensible against common web attacks.
+
+**Move to Level 6 when**: Security practices are applied consistently.
+
+### Level 6: Documented
+
+Code explains itself. Documentation explains why.
+
+| What to Document | Where | Standard |
+|-----------------|-------|----------|
+| Context purpose and public API | `@moduledoc` on context module | What it manages, key operations, examples |
+| Function contract | `@doc` + `@spec` | What it does, return values, examples with `iex>` |
+| Why a decision was made | Code comments | Link to ADR, ticket, or design doc |
+| Non-obvious business rules | Code comments | Explain the *why*, not the *what* |
+| Internal modules | `@moduledoc false` | Explicitly mark as internal |
+
+```elixir
+@doc """
+Authenticates a user by email and password.
+
+Returns `{:ok, user}` if valid, `{:error, :unauthorized}` otherwise.
+Uses constant-time comparison to prevent timing attacks.
+
+## Examples
+
+    iex> authenticate("alice@example.com", "correct_password")
+    {:ok, %User{}}
+
+    iex> authenticate("alice@example.com", "wrong_password")
+    {:error, :unauthorized}
+"""
+@spec authenticate(String.t(), String.t()) :: {:ok, User.t()} | {:error, :unauthorized}
+```
+
+**This level means**: A new developer can onboard by reading the code. The codebase is self-documenting.
+
+### Escalation Decision Flowchart
+
+```
+Where is the code in its lifecycle?
+  Just written / SPIKE            → Level 0 (compile clean)
+  Ready for precommit             → Level 1 (formatted) + Level 2 (Credo)
+  Ready for tests                 → Level 3 (tested)
+  Ready for team consumption      → Level 4 (typed)
+  Ready for production deploy     → Level 5 (secure)
+  Ready for long-term maintenance → Level 6 (documented)
+```
+
+**The precommit gate**: Levels 0-3 are automated and enforced on every commit:
+```bash
+mix compile --warnings-as-errors && mix format --check-formatted && mix credo --strict && mix test
+```
 
 ## Precommit Workflow
 

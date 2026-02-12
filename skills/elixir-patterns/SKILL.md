@@ -1,11 +1,251 @@
 ---
 name: elixir-patterns
-description: Use when implementing or refactoring Elixir code, designing system architecture, working with functional programming patterns, OTP design patterns (GenServer, supervision trees), or needing idiomatic Elixir code structures and best practices
+description: Use when writing GenServer, Supervisor, Registry, or Protocol code, structuring Phoenix contexts, using pattern matching or railway-oriented programming with `with`, or needing idiomatic Elixir OTP patterns
 ---
 
 # Elixir Patterns Skill
 
+**Type:** Pattern
+
 This skill provides comprehensive knowledge of production-ready Elixir patterns including functional programming principles, OTP design patterns, and idiomatic Elixir code structures.
+
+## Pattern Escalation Ladder
+
+Start at the top. Only reach for heavier patterns when simpler ones can't solve the problem.
+
+### Level 0: Pure Functions and Data Transformations
+
+No state. No processes. Just functions transforming data — this solves more problems than you think.
+
+| Need | Pattern | Mechanism |
+|------|---------|-----------|
+| Transform data through steps | Pipe operator | `data \|> step1() \|> step2() \|> step3()` |
+| Process a collection | Enum | `Enum.map/2`, `Enum.filter/2`, `Enum.reduce/3` |
+| Branch on data shape | Pattern matching in function heads | Multiple `def` clauses with different patterns |
+| Branch with conditions | Guards | `when is_binary(x)`, `when x > 0` |
+| Access nested data | Access / kernel functions | `get_in/2`, `put_in/3`, `update_in/3` |
+| Build up a result from a list | Reduce / comprehension | `Enum.reduce/3`, `for x <- list, do: ...` |
+| Process large or infinite data lazily | Stream | `Stream.map/2`, `Stream.filter/2` (lazy, on-demand) |
+
+```elixir
+# Most business logic is just this — no GenServer needed
+def calculate_order_total(order) do
+  order.line_items
+  |> Enum.map(&(&1.quantity * &1.unit_price))
+  |> Enum.sum()
+  |> apply_discount(order.discount_code)
+  |> add_tax(order.tax_rate)
+end
+```
+
+**Stay here when**: The function takes input and returns output with no side effects. This should be the vast majority of your code.
+
+**Move to Level 1 when**: Operations can fail and you need to handle the failure path.
+
+### Level 1: Error Handling and Control Flow
+
+Make success and failure explicit. Never return bare values that might be nil.
+
+| Need | Pattern | Mechanism |
+|------|---------|-----------|
+| Represent success/failure | Tagged tuples | `{:ok, value}` / `{:error, reason}` |
+| Chain operations that can fail | Railway-oriented `with` | `with {:ok, a} <- step1(), {:ok, b} <- step2(a), do:` |
+| Simple branching on a value | `case` | `case result do {:ok, v} -> ... ; {:error, r} -> ... end` |
+| Handle different error types | `with` + `else` clause | Pattern match specific error tuples in `else` |
+| Raise on truly unexpected errors | `!` functions | `Repo.get!(User, id)` — only when caller can't recover |
+
+```elixir
+# Chain fallible operations — first error short-circuits
+def register_user(params) do
+  with {:ok, validated} <- validate_params(params),
+       {:ok, user} <- insert_user(validated),
+       {:ok, _email} <- send_welcome_email(user) do
+    {:ok, user}
+  else
+    {:error, %Ecto.Changeset{} = cs} -> {:error, {:validation, cs}}
+    {:error, :email_failed} -> {:error, :email_failed}
+  end
+end
+```
+
+**Stay here when**: You're wiring together operations that return tagged tuples.
+
+**Move to Level 2 when**: You're validating external input (forms, API params, CSV imports).
+
+### Level 2: Data Validation at Boundaries
+
+Validate and cast untrusted data at the edges of your system. Trust data inside.
+
+| Need | Pattern | Mechanism |
+|------|---------|-----------|
+| Validate user/form input | Ecto.Changeset | `cast/3` → `validate_required/2` → `validate_format/3` |
+| Cast types from string params | Changeset casting | `cast(struct, params, [:name, :email, :age])` |
+| Database-level constraints | Changeset constraints | `unique_constraint/2`, `foreign_key_constraint/2` |
+| Custom business rule validation | `validate_change/3` | Run custom function on specific field changes |
+| Validate without a database | Embedded schema | `embedded_schema` + changeset — no Repo needed |
+| Validate API request body | Schemaless changeset | `{%{}, types} \|> cast(params, keys) \|> validate_*` |
+
+```elixir
+# Schemaless changeset — validate API params without a database schema
+types = %{email: :string, age: :integer, role: :string}
+
+{%{}, types}
+|> Ecto.Changeset.cast(params, Map.keys(types))
+|> Ecto.Changeset.validate_required([:email])
+|> Ecto.Changeset.validate_format(:email, ~r/@/)
+|> Ecto.Changeset.validate_inclusion(:role, ["admin", "user"])
+```
+
+**Stay here when**: You're at a system boundary — user input, API params, file imports.
+
+**Move to Level 3 when**: You need to hold mutable state across multiple calls.
+
+### Level 3: Stateful Processes
+
+Reach for processes only when you genuinely need state that persists between calls.
+
+| Need | Simplest Solution | NOT a GenServer |
+|------|-------------------|-----------------|
+| Read-heavy cache | ETS table with `:read_concurrency` | GenServer serializes all reads — bottleneck |
+| Concurrent counters | `:atomics` or `:counters` | GenServer serializes all increments |
+| App-wide config read at runtime | `:persistent_term` | Never changes or changes very rarely |
+| One-time computation result | `Agent` or `Task` | GenServer is overkill for get/set |
+| Coordinate access to a shared resource | **GenServer** | This is when GenServer is right |
+| Background processing with state | **GenServer** | State evolves based on incoming messages |
+| Rate limiting / throttling | **GenServer** | Track counts over sliding windows |
+
+```elixir
+# ETS for read-heavy cache — no process bottleneck
+:ets.new(:user_cache, [:named_table, :public, read_concurrency: true])
+:ets.insert(:user_cache, {user_id, user_data})
+:ets.lookup(:user_cache, user_id)
+
+# GenServer for stateful coordination — correct use
+defmodule RateLimiter do
+  use GenServer
+
+  def allow?(client_id) do
+    GenServer.call(__MODULE__, {:check, client_id})
+  end
+
+  @impl true
+  def handle_call({:check, client_id}, _from, state) do
+    {allowed, new_state} = check_and_update(client_id, state)
+    {:reply, allowed, new_state}
+  end
+end
+```
+
+**Key question**: "Does every caller need to see the same, current state?" If yes → GenServer. If reads can be slightly stale → ETS.
+
+**Move to Level 4 when**: Processes can crash and you need automatic recovery.
+
+### Level 4: Fault Tolerance and Supervision
+
+Supervisors turn "process crashed" from a catastrophe into a non-event.
+
+| Need | Pattern | Strategy |
+|------|---------|----------|
+| Restart a crashed process | Supervisor | `:one_for_one` — restart only the failed child |
+| Restart group when one fails | Supervisor | `:one_for_all` — all children restart together |
+| Restart downstream dependencies | Supervisor | `:rest_for_one` — failed child + those started after it |
+| Start processes on demand | DynamicSupervisor | `DynamicSupervisor.start_child/2` |
+| Limit restart rate | Supervisor options | `max_restarts: 3, max_seconds: 5` |
+
+```elixir
+# Application supervision tree — order matters
+children = [
+  MyApp.Repo,                          # Database first
+  {Phoenix.PubSub, name: MyApp.PubSub}, # PubSub before consumers
+  {MyApp.Cache, []},                    # Cache before web
+  {DynamicSupervisor, name: MyApp.WorkerSupervisor, strategy: :one_for_one},
+  MyAppWeb.Endpoint                     # Web last
+]
+
+Supervisor.start_link(children, strategy: :one_for_one)
+```
+
+**"Let it crash" means**: Handle *expected* errors (user input, network timeouts) with tagged tuples. Let *unexpected* errors (corrupted state, bugs) crash the process — the supervisor restarts it with clean state.
+
+**Move to Level 5 when**: You need many processes discovered by key, or concurrent one-off work.
+
+### Level 5: Process Discovery and Concurrency
+
+Coordinate dynamic sets of processes.
+
+| Need | Pattern | Mechanism |
+|------|---------|-----------|
+| Find process by key | Registry | `{:via, Registry, {MyApp.Registry, key}}` |
+| One process per entity (user, room, game) | Registry + DynamicSupervisor | Supervisor starts it, Registry finds it |
+| Run N things concurrently and collect results | Task.async_stream | `Task.async_stream(items, &work/1, max_concurrency: 10)` |
+| Fire-and-forget concurrent work | Task.Supervisor | `Task.Supervisor.start_child(sup, fn -> ... end)` |
+| Pub/Sub within the application | Registry with `:duplicate` keys | `Registry.dispatch/3` to all subscribers |
+
+```elixir
+# One process per user session, discoverable by user_id
+defmodule SessionWorker do
+  use GenServer
+
+  def start_link(user_id) do
+    GenServer.start_link(__MODULE__, user_id,
+      name: {:via, Registry, {MyApp.SessionRegistry, user_id}})
+  end
+end
+
+# Start on demand
+DynamicSupervisor.start_child(MyApp.SessionSupervisor, {SessionWorker, user_id})
+
+# Find later
+GenServer.call({:via, Registry, {MyApp.SessionRegistry, user_id}}, :get_state)
+```
+
+**Move to Level 6 when**: You need to organize many modules into coherent domain boundaries.
+
+### Level 6: Domain Architecture
+
+Structure the codebase by business domain, not by technical layer.
+
+| Need | Pattern | Mechanism |
+|------|---------|-----------|
+| Group related functionality | Phoenix Context | `Accounts`, `Orders`, `Products` — each owns its data |
+| Polymorphic behavior across types | Protocol | `defprotocol` + `defimpl` per type |
+| Enforce a contract for implementations | Behaviour | `@callback` + `@behaviour` |
+| Cross-context communication | PubSub events | `Phoenix.PubSub.broadcast/3` — not direct function calls |
+| Anti-corruption layer for external APIs | Wrapper context | Translate external data to internal domain structs |
+
+```elixir
+# Context is the public API — one module, clear boundary
+defmodule MyApp.Accounts do
+  def register_user(attrs)            # Public
+  def authenticate(email, password)   # Public
+  def get_user!(id)                   # Public
+
+  # Everything below is internal
+  defp hash_password(password), do: ...
+  defp send_confirmation(user), do: ...
+end
+
+# Cross-context: Orders needs user data? Call through the public API
+def create_order(user_id, items) do
+  user = Accounts.get_user!(user_id)  # Public API, not direct Repo query
+  ...
+end
+```
+
+**Boundaries**: Never `import` or `alias` another context's internal modules. Never write cross-context Ecto joins. Each context owns its schemas.
+
+### Escalation Decision Flowchart
+
+```
+What are you solving?
+  Transform data with no side effects   → Level 0 (pure functions)
+  Operations that can fail               → Level 1 (tagged tuples, with)
+  Validating external input              → Level 2 (Ecto.Changeset)
+  Need state across calls                → Level 3 (GenServer, but consider ETS first)
+  Process might crash                    → Level 4 (Supervision)
+  Many dynamic processes to coordinate   → Level 5 (Registry, Task, DynamicSupervisor)
+  Organizing modules into domains        → Level 6 (Contexts, Protocols, Behaviours)
+```
 
 ## Core Patterns
 
