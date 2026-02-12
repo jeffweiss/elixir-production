@@ -851,6 +851,26 @@ result = do_work()
 duration = DateTime.diff(DateTime.utc_now(), start, :millisecond)  # Can be wrong
 ```
 
+**Binary coalescence**: Never concatenate binaries in a loop (`<<buf/binary, data/binary>>`). Each concatenation copies both sides into a new, larger binary. As the accumulator grows, it crosses allocation thresholds — from fast multiblock carriers to slow single-block carriers — causing up to 20x slowdowns. Instead, collect chunks in a list and combine once with `IO.iodata_to_binary/1`.
+
+```elixir
+# ❌ Repeated concatenation — quadratic allocation, triggers slow allocator path
+def collect_bad(socket, buf \\ <<>>) do
+  case recv(socket) do
+    {:ok, data} -> collect_bad(socket, <<buf/binary, data/binary>>)
+    :done -> buf
+  end
+end
+
+# ✅ Collect as iodata list, combine once at the end
+def collect_good(socket, chunks \\ []) do
+  case recv(socket) do
+    {:ok, data} -> collect_good(socket, [chunks, data])
+    :done -> IO.iodata_to_binary(chunks)
+  end
+end
+```
+
 **Money and precision**: Never use floats for monetary values. Use `Decimal` (or integer cents). Floating-point rounding errors accumulate silently — `0.1 + 0.2 != 0.3` in IEEE 754.
 
 ```elixir
