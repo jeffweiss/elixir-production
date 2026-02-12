@@ -144,6 +144,25 @@ Single node handles the load?
 
 ## Core Concepts
 
+### Fundamental Limits
+
+Before choosing any distributed approach, understand what's theoretically impossible:
+
+- **FLP impossibility**: Consensus cannot be guaranteed in a purely asynchronous system if even one node can fail. Every consensus protocol (Raft, Paxos) works around this with timeouts and leader election — they use partial synchrony assumptions. This is why leader election can stall and why there's no "perfect" consensus.
+- **Failure detection is impossible in async systems**: You cannot distinguish a crashed node from a slow one. Practical systems use timeout heuristics — shorter timeouts mean faster detection but more false positives; longer timeouts mean fewer false positives but slower detection. Every `:net_kernel` heartbeat interval is a bet on this tradeoff.
+- **End-to-end acknowledgment is required**: A message sent is not a message received. A message received is not a message read. A message read is not a message acted on. Never trust network-layer delivery guarantees — require explicit application-level confirmation that the operation was received, processed, and persisted.
+
+```elixir
+# ❌ Fire and forget — assumes delivery
+GenServer.cast({:worker, remote_node}, {:process, item})
+
+# ✅ End-to-end acknowledgment — confirms processing
+case GenServer.call({:worker, remote_node}, {:process, item}, 5_000) do
+  {:ok, result} -> {:ok, result}
+  {:error, reason} -> handle_failure(item, reason)
+end
+```
+
 ### CAP Theorem Tradeoffs
 
 **Consistency + Availability + Partition Tolerance** - Pick 2:
@@ -165,6 +184,8 @@ Single node handles the load?
 - Examples: CRDTs (lasp, delta_crdt), Cassandra, DynamoDB
 - During partition: All nodes serve requests, reconcile later
 - Use case: Social media, content delivery, collaborative editing
+
+**Verify consistency labels**: Industry vendors inconsistently define terms like "eventual consistency," "linearizable," and "strong consistency." Don't trust marketing — verify the specific guarantees a system provides. Ask: What happens during a partition? What ordering is guaranteed? What does "consistent" actually mean in this context? Read the Jepsen analysis if one exists.
 
 **Elixir-specific considerations**:
 ```elixir
