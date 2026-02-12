@@ -167,6 +167,28 @@ Supervisor.start_link(children, strategy: :one_for_one)
 
 **"Let it crash" means**: Handle *expected* errors (user input, network timeouts) with tagged tuples. Let *unexpected* errors (corrupted state, bugs) crash the process — the supervisor restarts it with clean state.
 
+**Callers determine failure tolerance**: The process encountering an error should expose it — the *caller* decides what to do (retry, queue, ignore, alert). Don't hide failures inside a module; return them as tagged tuples and let the calling context determine the appropriate response based on its own requirements.
+
+```elixir
+# ✅ Expose the failure — let the caller decide
+def fetch_profile(user_id) do
+  case HTTPClient.get("/profiles/#{user_id}") do
+    {:ok, %{status: 200, body: body}} -> {:ok, decode(body)}
+    {:ok, %{status: status}} -> {:error, {:http_status, status}}
+    {:error, reason} -> {:error, {:connection, reason}}
+  end
+end
+
+# Caller A: Critical path — fail loudly
+{:ok, profile} = fetch_profile(user_id)
+
+# Caller B: Best-effort — degrade gracefully
+profile = case fetch_profile(user_id) do
+  {:ok, p} -> p
+  {:error, _} -> %{name: "Unknown", avatar: default_avatar()}
+end
+```
+
 **Init guarantees**: What `init/1` guarantees determines fault tolerance:
 - **Local dependencies** (ETS, file on disk): Guarantee in `init/1` or fail — if the process can't work without it, crash immediately
 - **Remote dependencies** (database, external API): Degrade gracefully — start the process, connect asynchronously, serve degraded responses until connected
@@ -716,6 +738,22 @@ end
 
 **Key principle**: Every queue must be bounded. Unbounded queues are a latent memory leak triggered by any traffic spike. Measure **sojourn time** (how long items wait in queue) — if it grows, you're overloaded regardless of queue depth.
 
+**Design for cold restart under load**: Systems must handle starting up when traffic is already flowing — not just warm, steady-state operation. If your application starts with empty caches and all connections initializing simultaneously, the thundering herd will overwhelm dependencies. Stagger connection establishment, use circuit breakers from the start, and serve degraded responses until warm.
+
+**Make operations idempotent**: In production, messages get retried, requests get duplicated, and jobs get re-enqueued. Design operations so that executing them twice produces the same result as executing them once. Use unique request IDs, `ON CONFLICT` clauses, and idempotency keys.
+
+```elixir
+# Idempotent insert — safe to retry
+def create_payment(attrs) do
+  %Payment{}
+  |> Payment.changeset(attrs)
+  |> Repo.insert(
+    on_conflict: :nothing,
+    conflict_target: [:idempotency_key]
+  )
+end
+```
+
 **Libraries**: `fuse` (circuit breakers), `poolboy` (bounded worker pools), `sbroker` (sojourn-time-based broker).
 
 ## Domain-Driven Design Patterns
@@ -797,6 +835,20 @@ Logger.metadata(request_id: conn.assigns.request_id)
 
 # ❌ Never: Application state in process dictionary
 Process.put(:current_user, user)  # Hidden global state
+```
+
+**Monotonic vs system time**: Use `System.monotonic_time/1` for measuring durations and elapsed time. Use `DateTime.utc_now/0` for timestamps displayed to humans. Never use wall-clock time for durations — NTP adjustments, VM migration, and leap seconds can make it jump backward or forward.
+
+```elixir
+# ✅ Monotonic for durations — immune to clock adjustments
+start = System.monotonic_time(:millisecond)
+result = do_work()
+duration_ms = System.monotonic_time(:millisecond) - start
+
+# ❌ Wall clock for durations — can produce negative values
+start = DateTime.utc_now()
+result = do_work()
+duration = DateTime.diff(DateTime.utc_now(), start, :millisecond)  # Can be wrong
 ```
 
 **Money and precision**: Never use floats for monetary values. Use `Decimal` (or integer cents). Floating-point rounding errors accumulate silently — `0.1 + 0.2 != 0.3` in IEEE 754.

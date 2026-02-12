@@ -182,9 +182,23 @@ You can't fix what you can't see. Observability is structured insight layered at
 )
 ```
 
+**Log facts, not interpretations**: Logs should record what happened, not what you think it means. Interpretations become wrong as the system evolves; facts remain useful forever.
+
+```elixir
+# ❌ Interpretation — misleading when the real cause is something else
+Logger.warning("Database seems slow, possible network issue")
+
+# ✅ Facts — lets the reader (or future you) draw correct conclusions
+Logger.info("Database query completed",
+  query_time_ms: 1547,
+  rows_returned: 0,
+  connection_pool_wait_ms: 1200
+)
+```
+
 **Operator Experience (OX)**: Design telemetry for the person who gets paged at 3am. Every metric should answer: What changed? What's the impact? Where's the bottleneck?
 
-**Avoid zombie metrics**: Metrics collected but never looked at, or that can't drive a decision, are waste. MTBF and MTTR are often zombie metrics — they measure averages that obscure actual failure modes.
+**Avoid zombie metrics**: Metrics collected but never looked at, or that can't drive a decision, are waste. MTBF and MTTR are often zombie metrics — they measure averages that obscure actual failure modes. A metric's value is the behavior it drives. If nobody acts on it, delete it.
 
 **Use monotonic time**: `System.monotonic_time/1` for measuring durations, never `DateTime.utc_now()`. Wall clock can jump (NTP adjustments, VM migration).
 

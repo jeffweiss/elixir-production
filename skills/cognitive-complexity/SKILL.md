@@ -320,6 +320,8 @@ end
 
 **Key insight**: When implementation details escape through the abstraction boundary, it creates **information leakage**. Changes to implementation now affect all callers.
 
+**Implicit decisions are hidden global state**: Every undocumented convention — "we always use UTC," "env vars are uppercase with underscores," "retry 3 times" — is a piece of global state living in team members' heads. When they leave, the implicit decisions leave with them. Make decisions explicit in code (config, types, module docs) or they become maintenance traps.
+
 **Types of leakage**:
 
 **Temporal coupling** - Must call functions in specific order:
@@ -483,6 +485,8 @@ end
 
 # Adding new types: implement protocol, no special cases
 ```
+
+**Lehman's Laws of Software Evolution**: Programs must undergo continual change or become progressively less useful. Without deliberate effort to reduce complexity, systems accumulate cruft until replacement becomes cheaper than maintenance. This isn't a risk — it's a certainty. Strategic programming is the counterforce.
 
 **When to invest strategically**:
 - Feature will be extended
