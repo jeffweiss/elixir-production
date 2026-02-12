@@ -206,10 +206,13 @@ Where is the code in its lifecycle?
   Ready for long-term maintenance → Level 6 (documented)
 ```
 
-**The precommit gate**: Levels 0-3 are automated and enforced on every commit:
-```bash
-mix compile --warnings-as-errors && mix format --check-formatted && mix credo --strict && mix test
+**The precommit gate**: Levels 0-3 are automated and enforced on every commit via a `mix precommit` alias:
+```elixir
+# mix.exs aliases
+precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "credo --strict", "test"]
 ```
+
+If the project does not have this alias, create it in `mix.exs` before running precommit checks. The alias ensures the quality ladder is enforced consistently both inside and outside Claude Code.
 
 ## Precommit Workflow
 

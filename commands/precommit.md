@@ -33,9 +33,9 @@ Runs four quality checks in sequence:
 
 ## Implementation
 
-### Step 1: Check Dependencies
+### Step 1: Check Dependencies and Aliases
 
-First verify that required tools are installed:
+First verify that required tools and the `mix precommit` alias are set up:
 
 ```bash
 # Check if credo is in mix.exs
@@ -62,6 +62,33 @@ if [[ -f ".formatter.exs" ]]; then
   fi
 fi
 ```
+
+**Check for `mix precommit` alias**: If the project does not already define a `precommit` alias in `mix.exs`, create one:
+
+```elixir
+# In mix.exs, inside the project/0 function:
+defp project do
+  [
+    # ... existing config ...
+    aliases: aliases()
+  ]
+end
+
+defp aliases do
+  [
+    # ... existing aliases ...
+    precommit: [
+      "compile --warnings-as-errors",
+      "deps.unlock --unused",
+      "format",
+      "credo --strict",
+      "test"
+    ]
+  ]
+end
+```
+
+This ensures `mix precommit` works as a standalone command outside of Claude Code, enforcing the production quality ladder consistently.
 
 ### Step 2: Run Checks
 
