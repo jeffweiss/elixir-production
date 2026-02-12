@@ -185,7 +185,7 @@ end
 - During partition: All nodes serve requests, reconcile later
 - Use case: Social media, content delivery, collaborative editing
 
-**Verify consistency labels**: Industry vendors inconsistently define terms like "eventual consistency," "linearizable," and "strong consistency." Don't trust marketing — verify the specific guarantees a system provides. Ask: What happens during a partition? What ordering is guaranteed? What does "consistent" actually mean in this context? Read the Jepsen analysis if one exists.
+**Stop calling databases CP or AP** (Kleppmann, "Please stop calling databases CP or AP"): The CAP theorem is too simplistic for real systems. CAP "consistency" means specifically *linearizability* (not ACID consistency); CAP "availability" means *every* non-failing node responds (not "high uptime"). Many real systems are neither CP nor AP — a single-leader database with async replication fits neither category. Different operations within one system may have different consistency characteristics. Worse, vendors use these terms inconsistently: Oracle's "serializable" is actually snapshot isolation; "repeatable read" means different things across PostgreSQL, MySQL, and SQL Server. Don't trust labels — verify specific guarantees. Ask: What happens during a partition? What ordering is guaranteed? What does "consistent" actually mean *precisely*? Read the Jepsen analysis if one exists.
 
 **Elixir-specific considerations**:
 ```elixir
@@ -542,7 +542,16 @@ defmodule QuorumCheck do
 end
 ```
 
-**2. Fencing tokens**:
+**2. Fencing tokens** (Kleppmann, "How to do distributed locking"):
+
+Distributed locks have two fundamentally different uses:
+- **Efficiency locks**: Prevent redundant work (duplicate emails, repeated computations). Occasional failure costs money, not correctness — a single-node Redis lock suffices.
+- **Correctness locks**: Prevent data corruption. Failure means inconsistency or data loss. These *require* fencing tokens backed by consensus.
+
+The danger: a client acquires a lock, pauses (GC, network delay), the lock expires, another client acquires it, then the first client resumes and writes — believing it still holds the lock. Fencing tokens prevent this because the storage layer rejects writes with stale tokens.
+
+**Warning**: Any locking algorithm that depends on timing assumptions (bounded network delays, bounded clock drift, bounded GC pauses) is unsafe for correctness. Real networks violate these assumptions routinely — GitHub once experienced 90-second packet delays. Use consensus-backed locks (`:ra`, ZooKeeper, etcd) with fencing for correctness; use Redis for efficiency-only locks.
+
 ```elixir
 defmodule LeaderFence do
   # Each leader gets monotonically increasing token
@@ -1255,6 +1264,8 @@ Redundancy improves availability **only** when four conditions are met (Brooker,
 2. **System works in degraded mode**: Cold caches, empty buffers, unwarmed connections — failover to a cold standby often fails in ways that weren't tested
 3. **Health detection is reliable**: Different nodes in different parts of the network routinely disagree on health. Incorrect failure detection causes worse outcomes than no detection
 4. **Return to full redundancy is automated**: Single-use redundancy (one failover, no recovery) provides negligible long-term availability improvement
+
+**Data loss probability increases with cluster size** (Kleppmann, "The probability of data loss in large clusters"): Counter-intuitively, larger clusters have *higher* probability of losing at least one partition's data, even with 3x replication. In an 8,000-node cluster with 0.1% daily node failure probability and 256 partitions per node, the annual probability of permanent data loss (~all 3 replicas of some partition failing simultaneously) reaches ~60%. The math: more partitions means more "lottery tickets" for the unlucky combination. Increasing replication factor or reducing partitions per node helps, but the fundamental scaling behavior is inescapable. For critical data at scale, complement replication with independent backup mechanisms.
 
 **The poison pill problem**: When a malformed event reaches a replicated state machine, all replicas fail identically — "running the same deterministic software on the same state produces the same bad outcome every time." This affects Raft clusters, primary/backup systems, and any architecture where replicas share logic and state. Defend against it with input validation at system boundaries and non-deterministic jitter in retry/recovery paths.
 

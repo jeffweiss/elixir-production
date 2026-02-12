@@ -997,6 +997,8 @@ Database migrations that acquire locks on large tables cause downtime during rol
 
 **Core principle**: Separate dangerous operations into distinct migrations. Each migration should be safe to run while the application is serving traffic.
 
+**Database isolation levels lie** (Kleppmann, "Hermitage: Testing the 'I' in ACID"): Systematic testing reveals that databases implement isolation levels differently despite the same SQL standard names. Oracle's "serializable" actually provides snapshot isolation (not true serializability). "Repeatable read" has different semantics in PostgreSQL, MySQL, and SQL Server. Don't trust vendor documentation — test actual concurrent behavior with your specific database. For Ecto applications using PostgreSQL, the default `:read_committed` is well-defined and consistent, but if you rely on stronger isolation (`:repeatable_read` or `:serializable`), verify the actual guarantees with concurrent tests, especially if you ever migrate databases.
+
 ### Crash Early, Not Silently
 
 Silent corruption is worse than a crash. A crash is visible, logged, and restarted. Silent corruption propagates through the system, corrupting data and causing failures far from the root cause.
