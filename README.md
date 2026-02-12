@@ -451,7 +451,7 @@ This plugin incorporates patterns from official Claude Code plugins:
 
 ## Status & Roadmap
 
-### ✅ Fully Implemented (v2.0.0)
+### ✅ Fully Implemented (v2.0.1)
 
 All 10 agents, 7 skills, and 11 commands are complete and production-ready. Skills follow progressive disclosure: lean SKILL.md (<500 words) with deep reference files for domain knowledge.
 
@@ -632,4 +632,4 @@ The skills in this plugin draw heavily from the work of many researchers and pra
 
 ---
 
-**Version**: 2.0.0 - All 10 agents, 7 skills, and 11 commands are fully implemented and production-ready.
+**Version**: 2.0.1 - All 10 agents, 7 skills, and 11 commands are fully implemented and production-ready.
