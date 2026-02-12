@@ -348,6 +348,18 @@ BEAM garbage-collects each process independently. This is a strength (one proces
 
 **Key insight**: The number of *GC runs* doesn't matter — what matters is the *duration* of each GC run, which is proportional to the live heap size.
 
+## Latency Measurement Pitfalls
+
+Even with profiling data, common measurement errors produce misleading results (Luu, "Some latency measurement pitfalls"):
+
+**Server-side latency ≠ client-observed latency**: Requests pass through client networking → network → server networking → server code. Server metrics capture only user code execution. In one case, server p99 was 16ms while client p99 was 240ms — a **15x gap** from queuing in network stacks, kernel throttling, and thread pool congestion. Always measure from the client's perspective.
+
+**Averaging per-shard tail latencies is meaningless**: Taking the average of per-shard p99 values defeats the purpose of monitoring tail latency. On a 100-node cluster where one node's tail latency increases 10x, the average shows only a 9% increase — masking the real impact on affected users. Export histogram data and reconstruct cluster-wide percentiles from raw distributions.
+
+**Minutely resolution hides sub-minute bursts**: A large latency spike followed by 30 seconds of low request rate can be invisible in standard minute-granularity metrics. For critical paths, collect at secondly or sub-secondly granularity.
+
+**Coordinated omission**: If your load generator waits for a response before sending the next request, slow responses reduce the *measured* request rate, hiding the true latency that queued requests would experience. Use open-loop load generators (constant arrival rate) for realistic latency measurement.
+
 ## Refusing Without Profiling Data
 
 When user asks for optimization advice without profiling:

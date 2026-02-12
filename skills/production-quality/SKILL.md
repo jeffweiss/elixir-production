@@ -182,6 +182,8 @@ You can't fix what you can't see. Observability is structured insight layered at
 )
 ```
 
+**Treat tracing as queryable analytics, not just debugging** (Luu, "A simple way to get more value from tracing"): Most organizations use traces only for debugging individual requests. The real ROI comes from making trace data queryable — export to SQL tables for aggregate analysis. This reveals load amplification patterns, unusual service dependencies, and call-path-specific latency that per-service metrics can't show. Tracing and metrics are complementary, not substitutes: metrics show *what* is happening system-wide; traces show *why* through specific call paths.
+
 **Use the span convention for telemetry events** (Keathley, "Telemetry Conventions"): Emit three events per operation — `[:lib, :function, :start]`, `[:lib, :function, :stop]`, and `[:lib, :function, :exception]`. This trio covers ~90% of APM, tracing, and time-series use cases. Never let users customize event names — consistency enables monitoring tools to reliably capture data. Emit telemetry from core code, not middleware. Treat telemetry as a public API: test it, because breaking changes damage production monitoring silently.
 
 **Log facts, not interpretations**: Logs should record what happened, not what you think it means. Interpretations become wrong as the system evolves; facts remain useful forever.

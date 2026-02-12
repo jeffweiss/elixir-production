@@ -938,6 +938,30 @@ end
 
 **Mitigation**: Don't rely solely on self-reported health. Monitor the *relationship* between components, not just the components themselves.
 
+### Limplocks — Degraded But Not Failed
+
+**Problem**: A node or component slows dramatically but doesn't crash. Health checks pass (the node is "alive"), but it operates at 1/1000th of normal speed. Unlike total failures that trigger failover, limplocks poison the entire cluster through shared resources (Luu, "Slowlock").
+
+**Why this is devastating**: One degraded Facebook node reduced cluster throughput from 172 jobs/hour to 1 job/hour — a 172x slowdown from a single node. Systems designed for binary fail/succeed have no mechanism to detect or eject degraded-but-alive nodes.
+
+**In Elixir/OTP**: A GenServer with a growing mailbox (due to a slow dependency) is a limplock — it responds to health checks but processes work at a fraction of normal rate. Connection pools where one connection targets a slow database replica cause similar cascading slowdowns.
+
+**Detection**: Monitor operation *throughput* and *latency percentiles*, not just availability. A node that passes pings but has p99 latency 100x normal is limplocked. Use the gray failure detection pattern (above) with latency thresholds, and eject nodes whose latency exceeds a multiple of the cluster median.
+
+### Concurrency Bug Taxonomy
+
+Research shows 97% of non-deadlock concurrency bugs fall into just two categories (Luu, "Notes on concurrency bugs"):
+
+1. **Atomicity violations** (69%): A thread/process reads shared state, then acts on it, but another has modified it in between (check-then-act race)
+2. **Ordering violations** (31%): Execution order assumptions are violated — operation B runs before operation A completes
+
+In distributed systems specifically:
+- 64% of bugs are triggered by a **single message** arriving at an unexpected time
+- 96% of bugs are reproducible by controlling the ordering of just **2 concurrent operations**
+- 47% of distributed bugs create **latent failures** — the system appears healthy but has silently corrupted state
+
+**Implication for testing**: Focus distributed tests on two-event orderings and single-message-timing scenarios. You don't need to simulate complex multi-node chaos — most bugs hide in simple two-operation races.
+
 ### Race Conditions in Distributed State
 
 **Problem**: Concurrent updates from different nodes
@@ -1221,6 +1245,9 @@ Before deploying distributed system:
 - [ ] **Blast radius**: Shared resources (pools, GenServers, Raft clusters) partitioned so one tenant/group failure doesn't cascade to all
 - [ ] **Gray failure detection**: Health checks include consumer-perspective signals, not just self-checks
 - [ ] **Dependency SLAs**: Every external dependency has a degraded-mode path or its SLA is accepted as your SLA ceiling
+- [ ] **Limplock detection**: Monitor operation latency percentiles, not just availability — eject nodes whose latency exceeds cluster median by >10x
+- [ ] **Cache death spiral prevention**: Latency increase → queue buildup → GC pressure → more latency is the most common cascading failure pattern. Bound all queues, implement back-pressure, and limit client retries (Luu, "A decade of major cache incidents at Twitter")
+- [ ] **Configuration change safety**: Treat config changes (feature flags, pool sizes, timeouts) with same rigor as code deploys — 50% of global outages stem from config changes
 
 ## When to Use Which Approach
 
