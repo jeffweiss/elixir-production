@@ -162,7 +162,39 @@ Defend against the OWASP top 10 relevant to Elixir/Phoenix.
 
 **Move to Level 6 when**: Security practices are applied consistently.
 
-### Level 6: Documented
+### Level 6: Observable
+
+You can't fix what you can't see. Observability is structured insight layered at the right abstraction levels — not "visibility into everything."
+
+| Layer | What to Measure | Elixir Tools |
+|-------|----------------|--------------|
+| OS/VM | Memory, CPU, scheduler utilization, GC | `:erlang.system_info/1`, `:erlang.statistics/1`, `recon` |
+| Framework | Request latency, queue depths, pool utilization | `Telemetry`, `:telemetry.attach/4` |
+| Application | Business metrics, context operation counts, error rates | Custom `Telemetry` events, StatsD/Prometheus |
+| User | Satisfaction, error pages served, timeout rates | Application-level tracking |
+
+```elixir
+# Telemetry that tells a story for the person paged at 3am
+:telemetry.execute(
+  [:my_app, :orders, :create],
+  %{duration: duration, queue_time: sojourn},
+  %{status: status, payment_method: method}
+)
+```
+
+**Operator Experience (OX)**: Design telemetry for the person who gets paged at 3am. Every metric should answer: What changed? What's the impact? Where's the bottleneck?
+
+**Avoid zombie metrics**: Metrics collected but never looked at, or that can't drive a decision, are waste. MTBF and MTTR are often zombie metrics — they measure averages that obscure actual failure modes.
+
+**Use monotonic time**: `System.monotonic_time/1` for measuring durations, never `DateTime.utc_now()`. Wall clock can jump (NTP adjustments, VM migration).
+
+**A 100% healthy system is suspicious**: If monitoring shows zero errors, zero latency spikes, and zero warnings, the most likely explanation is broken monitoring — not a perfect system.
+
+**This level means**: When something goes wrong in production, you can diagnose it without adding new instrumentation.
+
+**Move to Level 7 when**: Telemetry covers all four layers and drives actionable alerts.
+
+### Level 7: Documented
 
 Code explains itself. Documentation explains why.
 
@@ -203,7 +235,8 @@ Where is the code in its lifecycle?
   Ready for tests                 → Level 3 (tested)
   Ready for team consumption      → Level 4 (typed)
   Ready for production deploy     → Level 5 (secure)
-  Ready for long-term maintenance → Level 6 (documented)
+  Ready for production operations → Level 6 (observable)
+  Ready for long-term maintenance → Level 7 (documented)
 ```
 
 **The precommit gate**: Levels 0-3 are automated and enforced on every commit via a `mix precommit` alias:
@@ -502,7 +535,9 @@ end
 
 ### Property-Based Testing
 
-Use StreamData for exploring input space:
+Use StreamData for exploring the input space systematically. Property-based tests found 25 bugs in a 60,000-line codebase that unit tests missed — they're particularly effective at finding edge cases humans don't think of.
+
+**Core approach**: Define data generators, state invariants, and let the framework find counterexamples. When a test fails, the framework **shrinks** the input to the minimal reproducing case.
 
 ```elixir
 use ExUnitProperties
@@ -522,7 +557,26 @@ property "list sorting never loses elements" do
     assert Enum.all?(list, &(&1 in sorted))
   end
 end
+
+# Stateful property test — model-based testing
+property "cache behaves like a map" do
+  check all ops <- list_of(one_of([
+    tuple({constant(:put), string(:alphanumeric), integer()}),
+    tuple({constant(:get), string(:alphanumeric)})
+  ])) do
+    # Run same operations against cache and a map, compare results
+    {cache_results, _} = Enum.reduce(ops, {[], Cache.new()}, &run_cache_op/2)
+    {map_results, _} = Enum.reduce(ops, {[], %{}}, &run_map_op/2)
+    assert cache_results == map_results
+  end
+end
 ```
+
+**When to use property-based tests**:
+- Serialization/deserialization roundtrips (`decode(encode(x)) == x`)
+- Invariants that must hold for all inputs (sorting, filtering, transformation)
+- State machine behavior (model against a simpler reference implementation)
+- Anything with "for all X, Y should hold" shape
 
 ### Testing Best Practices
 
@@ -802,6 +856,46 @@ end
 - Uncertain about approach tradeoffs
 
 Use Benchee for microbenchmarks (see benchmark command).
+
+## Production Operations Principles
+
+### Start Strict, Loosen Later
+
+Postel's Law ("be liberal in what you accept") is dangerous when applied broadly. Starting permissive means you'll eventually depend on every input variation you accepted — and can never tighten. Start strict: reject anything unexpected. Loosen deliberately when real use cases demand it.
+
+```elixir
+# ✅ Start strict — reject unknown fields
+def changeset(struct, attrs) do
+  struct
+  |> cast(attrs, @known_fields)  # Unknown fields silently dropped by cast
+  |> validate_required(@required_fields)
+  |> validate_inclusion(:status, @valid_statuses)
+end
+
+# ❌ Don't accept anything and figure it out later
+def process(params) do
+  # "Be liberal" — now you can never change what params looks like
+  Map.merge(@defaults, params)
+end
+```
+
+### Crash Early, Not Silently
+
+Silent corruption is worse than a crash. A crash is visible, logged, and restarted. Silent corruption propagates through the system, corrupting data and causing failures far from the root cause.
+
+```elixir
+# ✅ Crash early — fail where the problem is
+def process_payment(%{amount: amount}) when amount > 0, do: # ...
+def process_payment(%{amount: amount}) do
+  raise ArgumentError, "payment amount must be positive, got: #{inspect(amount)}"
+end
+
+# ❌ Silent corruption — bad data propagates
+def process_payment(%{amount: amount}) do
+  amount = max(amount, 0)  # Silently "fix" invalid data
+  # Now debugging why orders have $0 charges is a nightmare
+end
+```
 
 ## Additional References
 

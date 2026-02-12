@@ -142,7 +142,7 @@ end
 
 ### Level 4: Fault Tolerance and Supervision
 
-Supervisors turn "process crashed" from a catastrophe into a non-event.
+Supervisors turn "process crashed" from a catastrophe into a non-event. 131 of 132 production faults are transient (Heisenbugs) — restarting with clean state is the correct default response.
 
 | Need | Pattern | Strategy |
 |------|---------|----------|
@@ -166,6 +166,35 @@ Supervisor.start_link(children, strategy: :one_for_one)
 ```
 
 **"Let it crash" means**: Handle *expected* errors (user input, network timeouts) with tagged tuples. Let *unexpected* errors (corrupted state, bugs) crash the process — the supervisor restarts it with clean state.
+
+**Init guarantees**: What `init/1` guarantees determines fault tolerance:
+- **Local dependencies** (ETS, file on disk): Guarantee in `init/1` or fail — if the process can't work without it, crash immediately
+- **Remote dependencies** (database, external API): Degrade gracefully — start the process, connect asynchronously, serve degraded responses until connected
+
+```elixir
+# Local dep — guarantee or fail
+def init(_opts) do
+  table = :ets.new(:cache, [:named_table, :public, read_concurrency: true])
+  {:ok, %{table: table}}  # If ETS fails, process crashes — correct
+end
+
+# Remote dep — degrade gracefully
+def init(opts) do
+  send(self(), :connect)  # Connect async after init
+  {:ok, %{conn: nil, status: :connecting, retry_count: 0}}
+end
+
+def handle_info(:connect, state) do
+  case try_connect(state) do
+    {:ok, conn} -> {:noreply, %{state | conn: conn, status: :connected}}
+    {:error, _} ->
+      Process.send_after(self(), :connect, backoff(state.retry_count))
+      {:noreply, %{state | retry_count: state.retry_count + 1}}
+  end
+end
+```
+
+**Whiteboard exercise for choosing supervision strategy**: Draw the process tree on a whiteboard. For each process, ask: "If this process dies, should its siblings die too?" If yes → `:one_for_all`. If only downstream → `:rest_for_one`. If independent → `:one_for_one`. The answer determines the strategy.
 
 **Move to Level 5 when**: You need many processes discovered by key, or concurrent one-off work.
 
@@ -653,6 +682,42 @@ results = Task.await_many(tasks, 5000)
 end)
 ```
 
+### 11. Overload Management
+
+When a system receives more work than it can handle, there are only two sustainable responses: **back-pressure** (slow the caller down) and **load-shedding** (drop work). Queues without bounds don't fix overload — they hide it until the system runs out of memory.
+
+| Strategy | When | Mechanism |
+|----------|------|-----------|
+| Back-pressure | Caller can wait | Bounded mailboxes, `GenServer.call` timeouts, pool checkout limits |
+| Load-shedding | Freshness matters more than completeness | Drop oldest messages, reject requests, sample |
+| Circuit breaker | Remote dependency is failing | Trip open after N failures, half-open to test recovery |
+| Bounded queue | Buffer small bursts | Fixed-size queue; reject or drop when full |
+
+```elixir
+# Back-pressure with GenServer.call timeout — caller slows down naturally
+def submit_work(item) do
+  GenServer.call(__MODULE__, {:submit, item}, 5_000)
+end
+
+# Load-shedding with ETS atomic counter
+def allow_request?(client_id) do
+  count = :ets.update_counter(:rate_limits, client_id, {2, 1}, {client_id, 0})
+  count <= @max_requests_per_window
+end
+
+# Circuit breaker with :fuse library
+:fuse.install(:external_api, {{:standard, 5, 10_000}, {:reset, 60_000}})
+
+case :fuse.ask(:external_api, :sync) do
+  :ok -> call_external_api(params)
+  :blown -> {:error, :circuit_open}
+end
+```
+
+**Key principle**: Every queue must be bounded. Unbounded queues are a latent memory leak triggered by any traffic spike. Measure **sojourn time** (how long items wait in queue) — if it grows, you're overloaded regardless of queue depth.
+
+**Libraries**: `fuse` (circuit breakers), `poolboy` (bounded worker pools), `sbroker` (sojourn-time-based broker).
+
 ## Domain-Driven Design Patterns
 
 ### Contexts
@@ -719,6 +784,31 @@ For deeper dive into specific patterns, see:
 - Complex OTP patterns (GenStateMachine, :gen_statem)
 - Umbrella applications for separation
 - Consider distributed systems patterns (see distributed-systems skill)
+
+## BEAM-Specific Nuances
+
+**Body vs tail recursion**: Tail recursion is not always faster for list-building. Body recursion builds the list naturally in order; tail recursion requires a final `Enum.reverse/1`. For small-to-medium lists, body recursion can outperform tail + reverse. Use `Enum` functions as the default — they're optimized. Only hand-roll recursion when profiling shows a bottleneck.
+
+**Process dictionary**: Legitimate only for metadata that doesn't affect business logic — tracing context, profiling counters, logger metadata. Never use it for application state. It creates hidden global state that breaks referential transparency and makes testing unpredictable.
+
+```elixir
+# ✅ Legitimate: Logger metadata (doesn't affect logic)
+Logger.metadata(request_id: conn.assigns.request_id)
+
+# ❌ Never: Application state in process dictionary
+Process.put(:current_user, user)  # Hidden global state
+```
+
+**Money and precision**: Never use floats for monetary values. Use `Decimal` (or integer cents). Floating-point rounding errors accumulate silently — `0.1 + 0.2 != 0.3` in IEEE 754.
+
+```elixir
+# ✅ Decimal for money
+field :price, :decimal
+Decimal.add(Decimal.new("19.99"), Decimal.new("5.01"))  # => Decimal.new("25.00")
+
+# ❌ Float for money — silent rounding errors
+price = 19.99 + 5.01  # => 25.0 (happens to work, but won't always)
+```
 
 ## Success Metrics
 

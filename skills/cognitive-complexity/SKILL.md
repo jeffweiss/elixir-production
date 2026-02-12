@@ -220,7 +220,37 @@ end
 # Adding new types doesn't increase complexity
 ```
 
-### 2. Deep Modules
+### 2. Complexity Can Only Be Relocated
+
+**Key insight**: Complexity cannot be eliminated — only moved. Every "simplification" pushes complexity somewhere else: to the caller, to configuration, to documentation, to the deployment process. The question is never "how do I remove this complexity?" but "where should this complexity live?"
+
+**Implications**:
+- Removing a layer of abstraction doesn't remove the complexity it handled — it pushes it to callers
+- "Simple" APIs that hide too much push complexity to debugging and operations
+- Legacy code isn't bad code — it's abstractions made for a context that no longer exists
+- The goal is placing complexity where it does the least damage, not pretending it's gone
+
+**Write code that's easy to delete, not easy to maintain**: Code that's easy to delete has clear boundaries, minimal dependents, and doesn't entangle with unrelated systems. When requirements change, you can rip it out cleanly. Code that's "easy to maintain" often means deeply integrated — easy to extend but impossible to remove.
+
+**In Elixir**:
+```elixir
+# Easy to delete — self-contained context with clear boundary
+defmodule MyApp.Promotions do
+  # If promotions feature is cut, delete this directory.
+  # No other context reaches into our schemas or queries.
+end
+
+# Hard to delete — cross-context coupling
+defmodule MyApp.Orders do
+  def create_order(params) do
+    # Direct dependency on Promotions internals
+    promo = Repo.get_by(MyApp.Promotions.PromoCode, code: params.promo_code)
+    # Now Orders can't exist without Promotions schema
+  end
+end
+```
+
+### 3. Deep Modules
 
 **Core concept**: Best modules have **simple interfaces** but **powerful implementations**. Think of module depth as:
 
@@ -286,7 +316,7 @@ end
 - Exposes internal data structures
 - Many "you must also..." requirements
 
-### 3. Information Leakage
+### 4. Information Leakage
 
 **Key insight**: When implementation details escape through the abstraction boundary, it creates **information leakage**. Changes to implementation now affect all callers.
 
@@ -353,7 +383,7 @@ def get(key) do
 end
 ```
 
-### 4. Pull Complexity Downward
+### 5. Pull Complexity Downward
 
 **Key insight**: It's better to add complexity to an implementation to simplify the interface than to push complexity to all callers.
 
@@ -401,7 +431,7 @@ end
 
 **Trade-off**: Sometimes creates multiple functions (`get_user/1`, `get_active_user/1`, `get_verified_user/1`), but each is simple to use correctly.
 
-### 5. Strategic vs Tactical Programming
+### 6. Strategic vs Tactical Programming
 
 **Tactical** (working code, accumulates complexity):
 - "Just get it working"
@@ -465,7 +495,9 @@ end
 - One-off scripts
 - Time-critical fixes (refactor later)
 
-### 6. Define Errors Out of Existence
+**Technical debt is not like financial debt**: Financial debt is a loan with known repayment terms. Technical shortcuts compound immediately and unpredictably — each shortcut makes the next change harder. Think of it as "shoveling forward" — you're not borrowing from the future, you're dumping problems ahead of yourself on the same path you'll walk. Either stop and clean up the mess, or abandon that path entirely. There is no "repayment schedule."
+
+### 7. Define Errors Out of Existence
 
 **Key insight**: Best error handling is preventing errors from happening through better design.
 
@@ -537,7 +569,7 @@ def calculate_percentage(part, 0), do: 0  # Sensible domain interpretation
 def calculate_percentage(part, whole), do: (part / whole) * 100
 ```
 
-### 7. Comments Should Explain "Why"
+### 8. Comments Should Explain "Why"
 
 **Key insight**: Code shows **what** it does. Comments should explain **why** it does it that way.
 
