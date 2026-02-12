@@ -340,6 +340,42 @@ end
 - `:ra` - Production-grade (RabbitMQ)
 - `raft` - Pure Elixir implementation
 
+**`:ra` hardening configuration**:
+```elixir
+# Enable pre-vote to prevent spurious elections during asymmetric partitions.
+# Without pre-vote, a node that can't receive heartbeats will start elections
+# and force the healthy leader to step down.
+config :ra,
+  pre_vote: true
+
+# Tune timeouts for your network characteristics
+# election_timeout: too short → spurious elections; too long → slow failover
+# heartbeat_interval: should be ~1/3 of election_timeout
+```
+
+**Leader step-down check** — a leader must confirm it can reach a majority, not just send heartbeats:
+```elixir
+defmodule LeaderHealthCheck do
+  @doc """
+  Verify the leader can both send AND receive from a majority.
+  A leader that can send heartbeats but not receive acks
+  should step down — it may be in an asymmetric partition.
+  """
+  def should_step_down?(follower_acks, cluster_size, heartbeat_timeout) do
+    now = System.monotonic_time(:millisecond)
+    quorum = div(cluster_size, 2) + 1
+
+    recent_acks =
+      Enum.count(follower_acks, fn {_node, last_ack} ->
+        now - last_ack < heartbeat_timeout
+      end)
+
+    # +1 counts the leader itself
+    recent_acks + 1 < quorum
+  end
+end
+```
+
 #### Multi-Raft with Leader Leases
 
 **Advanced pattern** used by CockroachDB, TiKV:
@@ -742,6 +778,123 @@ defmodule ReadRepair do
   end
 end
 ```
+
+### Asymmetric Network Partitions
+
+**Problem**: Most partition testing assumes symmetric failure (A can't reach B, B can't reach A). Real networks also produce *asymmetric* partitions where A can send to B but B cannot respond — creating scenarios that violate Raft's typical assumptions.
+
+**Why this is dangerous**: Erlang distribution has a binary view of connectivity (node is up or down) and assumes transitivity (if A↔B and B↔C then A↔C). Asymmetric partitions violate both assumptions.
+
+**`:ra` specific scenario**:
+```
+Three-node :ra cluster [node1 (leader), node2, node3]
+
+Asymmetric partition:
+  node1 → node2: CAN send
+  node2 → node1: CANNOT send
+  node1 ↔ node3: bidirectional OK
+  node2 ↔ node3: bidirectional OK
+
+Result:
+  - node1 sends heartbeats to node2 (delivered) and node3 (acked)
+  - node2 never receives heartbeats (one-way loss), triggers election
+  - node3 may vote for node2, creating a new leader in a higher term
+  - node1 doesn't know it's been superseded until it tries to commit
+  - Brief dual-leader window: committed entries are safe (Raft guarantees),
+    but in-flight requests may timeout or be redirected
+```
+
+**Bidirectional connectivity probing** — don't rely on Erlang's `:nodeup`/`:nodedown`:
+```elixir
+defmodule BidirectionalProbe do
+  @doc """
+  Actively verify two-way connectivity. Erlang distribution may report
+  a node as 'up' when only one direction works.
+  """
+  def check(remote_node, timeout \\ 2_000) do
+    ref = make_ref()
+
+    try do
+      # Ask the remote node to call us back — confirms both directions
+      case :rpc.call(remote_node, __MODULE__, :echo, [node(), ref], timeout) do
+        {:echoed, ^ref} -> :bidirectional
+        {:badrpc, _} -> :unreachable
+      end
+    catch
+      :exit, _ -> :unreachable
+    end
+  end
+
+  @doc "Called on remote node — proves it can reach us"
+  def echo(caller_node, ref) do
+    case :rpc.call(caller_node, Kernel, :node, [], 1_000) do
+      ^caller_node -> {:echoed, ref}
+      _ -> {:one_way_only, ref}
+    end
+  end
+end
+```
+
+**Multi-level health checks** — check all three layers, not just Erlang distribution:
+```elixir
+defmodule ClusterHealth do
+  def check(ra_server) do
+    with :ok <- check_erlang_distribution(),
+         :ok <- check_raft_consensus(ra_server),
+         :ok <- check_application_liveness(ra_server) do
+      :healthy
+    end
+  end
+
+  defp check_erlang_distribution do
+    expected = Application.get_env(:my_app, :cluster_nodes, [])
+    missing = expected -- [node() | Node.list()]
+    if missing == [], do: :ok, else: {:error, {:nodes_missing, missing}}
+  end
+
+  defp check_raft_consensus(ra_server) do
+    # Submit a test command — confirms the cluster can make progress
+    case :ra.process_command(ra_server, {:health_check, System.monotonic_time()}, 2_000) do
+      {:ok, _, _} -> :ok
+      {:timeout, _} -> {:error, :consensus_timeout}
+      {:error, reason} -> {:error, {:consensus_error, reason}}
+    end
+  end
+
+  defp check_application_liveness(ra_server) do
+    # Verify the state machine is responsive, not just the Raft layer
+    case :ra.leader_query(ra_server, fn state -> map_size(state) end, 2_000) do
+      {:ok, {_, _}, _} -> :ok
+      _ -> {:error, :state_machine_unresponsive}
+    end
+  end
+end
+```
+
+**Monitoring for asymmetry** — frequent leader elections with all nodes "up" is the signature:
+```elixir
+# Attach to :ra telemetry events
+:telemetry.attach_many(
+  "ra-partition-detection",
+  [
+    [:ra, :server, :term_changed],
+    [:ra, :server, :election_timeout],
+    [:ra, :server, :command_timeout]
+  ],
+  fn event, measurements, metadata, _config ->
+    Logger.warning("Raft event",
+      event: event,
+      term: metadata[:term],
+      node: node(),
+      visible_nodes: Node.list()
+    )
+  end,
+  nil
+)
+# Alert pattern: frequent term changes + all nodes visible = asymmetric partition
+```
+
+**Testing asymmetric partitions**: Use `toxiproxy` or `iptables` rules that drop traffic in one direction only. Most network partition test tools (including Erlang's `:net_kernel.disconnect/1`) simulate symmetric partitions and will miss these bugs.
 
 ### Race Conditions in Distributed State
 
