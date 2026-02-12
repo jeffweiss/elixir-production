@@ -102,6 +102,10 @@ types = %{email: :string, age: :integer, role: :string}
 
 ### Level 3: Stateful Processes
 
+**The fundamental rule** (Jurić, "To spawn, or not to spawn?"): Use functions and modules to separate *thought concerns*. Use processes to separate *runtime concerns*. Don't use processes — not even agents — to organize code. A process has a cost (memory, communication overhead, synchronization complexity). The only justification for that cost is a runtime benefit: fault isolation, parallelism, or managing state across calls. If activities are naturally sequential and synchronized, a single process is correct even if the domain has multiple "things."
+
+**Separate domain logic from temporal logic**: Pure functions return *instructions* (data describing what should happen). The GenServer handles *when and how* — message delivery, timeouts, retries, persistence. This keeps domain logic testable without process infrastructure.
+
 Reach for processes only when you genuinely need state that persists between calls.
 
 | Need | Simplest Solution | NOT a GenServer |
@@ -705,6 +709,8 @@ results = Task.await_many(tasks, 5000)
   expensive_operation()
 end)
 ```
+
+**Beyond async/await** (Jurić, "Beyond Task.Async"): `Task.await_many/2` processes results in submission order. If the first task is slowest, all others wait. For latency-sensitive fan-out, use `Task.yield_many/2` to process results as they arrive, and `Process.send_after/3` for a global timeout across all tasks.
 
 ### 11. Overload Management
 

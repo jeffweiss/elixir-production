@@ -330,6 +330,24 @@ Benchee.run(%{
 
 If time increases quadratically with input size, algorithmic improvement is needed.
 
+## BEAM Per-Process GC and Latency
+
+BEAM garbage-collects each process independently. This is a strength (one process's GC doesn't pause another) but creates a trap: **a process with a large live heap will have long GC pauses**, causing latency spikes even when the rest of the system is fine (Jurić, "Reducing the maximum latency of a bound buffer").
+
+**Diagnosis**: If profiling shows p99.9+ latency spikes concentrated in a single GenServer, check its heap size with `:erlang.process_info(pid, :heap_size)`. A process holding 200k+ live references will trigger multi-millisecond GC pauses.
+
+**Mitigation techniques** (in order of preference):
+
+1. **Offload data to ETS**: Store large collections in ETS tables instead of process state. ETS data lives outside the process heap and is freed immediately on deletion — no GC involvement. This can reduce max latency from ~37ms to ~300μs.
+
+2. **Split into smaller processes**: A single process holding 200k items can be split into 20 processes holding 10k each. Each will GC faster, and GCs won't block each other.
+
+3. **Preallocate heap for one-off jobs**: For temporary processes that allocate heavily, use `Process.spawn(fn -> ... end, [:link, {:min_heap_size, large_value}])` to avoid repeated heap expansion and GC during the job. The memory is reclaimed instantly when the process terminates.
+
+4. **Use refc binaries**: Binaries >64 bytes are stored on a shared heap with reference counting, not on the process heap. If your data is naturally binary (strings, serialized data), this reduces per-process heap pressure automatically.
+
+**Key insight**: The number of *GC runs* doesn't matter — what matters is the *duration* of each GC run, which is proportional to the live heap size.
+
 ## Refusing Without Profiling Data
 
 When user asks for optimization advice without profiling:
