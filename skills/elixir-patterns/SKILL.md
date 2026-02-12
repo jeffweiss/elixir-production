@@ -138,6 +138,8 @@ end
 
 **Key question**: "Does every caller need to see the same, current state?" If yes → GenServer. If reads can be slightly stale → ETS.
 
+**The Single Global Process anti-pattern**: A GenServer that caches database state for fast reads seems elegant but is "one of the most intricate patterns you can introduce to your system despite being one of the easiest to build" (Keathley, "The Dangers of the Single Global Process"). On multiple nodes behind a load balancer, each node spawns its own copy — creating duplicate state that diverges silently. Inconsistent data bugs produce no crashes or stack traces; they surface only when examining business metrics. During netsplits, nodes cannot tell whether peers failed or disconnected, compounding the problem. **Default to the database for consistency.** Only use GenServer-as-cache when you've explicitly addressed multi-node consistency (via CRDTs, consistent hashing, or accepting eventual consistency).
+
 **Move to Level 4 when**: Processes can crash and you need automatic recovery.
 
 ### Level 4: Fault Tolerance and Supervision
@@ -754,7 +756,9 @@ def create_payment(attrs) do
 end
 ```
 
-**Libraries**: `fuse` (circuit breakers), `poolboy` (bounded worker pools), `sbroker` (sojourn-time-based broker).
+**Adaptive concurrency** (Keathley, "Using Regulator"): Static concurrency limits guess wrong — too low wastes capacity, too high causes overload. Adaptive concurrency observes latency and error rates, then adjusts limits dynamically using Little's Law (L = λ × W). Use AIMD (Additive Increase, Multiplicative Decrease) for outbound calls with timeout set to maximum expected latency. **Autoscaling does not solve overload** — it often makes it worse by increasing downstream pressure, especially on databases.
+
+**Libraries**: `fuse` (circuit breakers), `poolboy` (bounded worker pools), `sbroker` (sojourn-time-based broker), `regulator` (adaptive concurrency limits).
 
 ## Domain-Driven Design Patterns
 
@@ -796,6 +800,33 @@ end
 - Never cross-context database queries
 - Use public APIs for cross-context calls
 - Each context owns its data
+
+## Code Quality Patterns
+
+Idiomatic Elixir patterns that prevent common bugs (Keathley, "Good and Bad Elixir"):
+
+**Use Access protocol over Map.get**: `opts[:foo]` works with both maps and keyword lists. `Map.get(opts, :foo)` locks you to maps — changing the data structure breaks all call sites.
+
+**Only return error tuples when callers can act on them**: If nothing actionable exists, raise instead of returning `{:error, reason}`. Forcing callers to handle unrecoverable errors adds noise without safety.
+
+```elixir
+# ❌ Caller can't do anything useful with this error
+def get_config!(key) do
+  case Application.fetch_env(:my_app, key) do
+    {:ok, value} -> {:ok, value}
+    :error -> {:error, :missing_config}  # What can caller do? Nothing.
+  end
+end
+
+# ✅ Raise for truly unrecoverable situations
+def get_config!(key) do
+  Application.fetch_env!(:my_app, key)
+end
+```
+
+**Guard what IS, not what ISN'T**: Check `is_binary(req)` instead of `not is_nil(req)`. Positive guards catch more bugs — `not is_nil` accepts atoms, integers, lists, and everything else that isn't nil.
+
+**Expose single-entity operations for composability**: Wrapping `Enum.map` around a function hides reuse opportunities. Exposing the single-item operation lets callers compose with `Enum`, `Stream`, `Task.async_stream`, or `Flow`.
 
 ## Additional References
 

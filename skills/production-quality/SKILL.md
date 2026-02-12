@@ -182,6 +182,8 @@ You can't fix what you can't see. Observability is structured insight layered at
 )
 ```
 
+**Use the span convention for telemetry events** (Keathley, "Telemetry Conventions"): Emit three events per operation — `[:lib, :function, :start]`, `[:lib, :function, :stop]`, and `[:lib, :function, :exception]`. This trio covers ~90% of APM, tracing, and time-series use cases. Never let users customize event names — consistency enables monitoring tools to reliably capture data. Emit telemetry from core code, not middleware. Treat telemetry as a public API: test it, because breaking changes damage production monitoring silently.
+
 **Log facts, not interpretations**: Logs should record what happened, not what you think it means. Interpretations become wrong as the system evolves; facts remain useful forever.
 
 ```elixir
@@ -977,6 +979,21 @@ If your service depends on another service, that dependency must meet the same S
 ### Quality Assurance is a Data Mining Problem
 
 At sufficient scale, quality assurance shifts from "run the test suite" to "analyze production telemetry for anomalies" (Hamilton). Unit and integration tests catch known failure modes. Production metrics catch unknown failure modes. Invest in both, but as system scale grows, the ratio shifts toward observability.
+
+### Safe Ecto Migrations
+
+Database migrations that acquire locks on large tables cause downtime during rolling deploys. Every migration must be evaluated for lock safety (Bernheisel, "Safe Ecto Migrations"):
+
+| Operation | Danger | Safe Alternative |
+|-----------|--------|-----------------|
+| Add index | ShareLock blocks writes | `create index(..., concurrently: true)` with `@disable_ddl_transaction true` and `@disable_migration_lock true` |
+| Add column with default | Table rewrite (pre-PG11) | Add column nullable first, add default in separate migration |
+| Add foreign key | Validates entire table under lock | Add with `validate: false`, validate in separate migration |
+| Change column type | Blocks reads and writes | Create new column → write to both → backfill → migrate reads → drop old |
+| Remove column | Breaks running instances | Remove from Ecto schema first deploy, drop column in next migration |
+| Add NOT NULL | Full table scan under lock | Add check constraint unvalidated → backfill → validate → apply NOT NULL |
+
+**Core principle**: Separate dangerous operations into distinct migrations. Each migration should be safe to run while the application is serving traffic.
 
 ### Crash Early, Not Silently
 
