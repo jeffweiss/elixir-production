@@ -938,6 +938,26 @@ end
 
 **Mitigation**: Don't rely solely on self-reported health. Monitor the *relationship* between components, not just the components themselves.
 
+### Metastable Failures
+
+**Problem**: A trigger (traffic spike, deployment, brief failure) pushes the system into a bad state that **persists even after the trigger is removed**. The system is "up, but down" — high throughput but zero goodput because all responses arrive after clients have timed out (Bronson et al., "Metastable Failures in Distributed Systems"; Brooker, "Metastability and Distributed Systems").
+
+**Why this is different from cascading failure**: Cascading failures spread to new components. Metastable failures are self-sustaining within the *same* components through feedback loops. Removing the trigger doesn't help — the system can't escape without manual intervention or load reduction below the recovery threshold.
+
+**Sustaining feedback loops** (the real danger — not the trigger):
+- **Retry amplification**: Requests time out → clients retry → server processes both original and retry → more timeouts → more retries
+- **Cache stampede**: Cache eviction during overload → every request hits database → database slows → more cache misses
+- **GC death spiral**: Large mailboxes → GC pauses → slower processing → larger mailboxes
+- **Connection churn**: Timeouts → connection resets → TLS handshake storms → more timeouts
+
+**In Elixir/OTP**: A GenServer with a growing mailbox is a classic metastable feedback loop. Messages arrive faster than they're processed → mailbox grows → GC pauses increase → processing slows further. The GenServer appears alive but delivers zero useful work. `Process.info(pid, :message_queue_len)` is your early warning signal.
+
+**Mitigations**:
+- **Fast error paths**: Rejecting a request must be cheaper than processing it. If error handling is slower than success handling (e.g., logging, retries, cleanup), overload will be self-reinforcing
+- **Bound retry amplification**: Use token bucket retries (see elixir-patterns skill), not unbounded retries. Each successful response deposits 0.1 tokens; each retry costs 1 token
+- **Monitor goodput, not throughput**: A system processing 10,000 req/s with 0% success rate is worse than one processing 1,000 req/s at 99% success. Alert on goodput decline, not just error rate increase
+- **Load shedding at the edge**: Reject requests before they enter the processing pipeline. A 503 at the load balancer is better than a timeout deep in the call stack
+
 ### Limplocks — Degraded But Not Failed
 
 **Problem**: A node or component slows dramatically but doesn't crash. Health checks pass (the node is "alive"), but it operates at 1/1000th of normal speed. Unlike total failures that trigger failover, limplocks poison the entire cluster through shared resources (Luu, "Slowlock").
@@ -1227,6 +1247,17 @@ end
 
 **When to apply**: Any system where a shared resource (pool, GenServer, ETS table, Raft cluster) serves all tenants. Partition it so one tenant's thundering herd doesn't take down another's service.
 
+### Redundancy Conditions
+
+Redundancy improves availability **only** when four conditions are met (Brooker, "When Redundancy Actually Helps", "Redundant against what?"):
+
+1. **Complexity doesn't exceed benefit**: Added redundancy introduces operational and understanding risks. If operators can't reason about the redundant system, it's net-negative
+2. **System works in degraded mode**: Cold caches, empty buffers, unwarmed connections — failover to a cold standby often fails in ways that weren't tested
+3. **Health detection is reliable**: Different nodes in different parts of the network routinely disagree on health. Incorrect failure detection causes worse outcomes than no detection
+4. **Return to full redundancy is automated**: Single-use redundancy (one failover, no recovery) provides negligible long-term availability improvement
+
+**The poison pill problem**: When a malformed event reaches a replicated state machine, all replicas fail identically — "running the same deterministic software on the same state produces the same bad outcome every time." This affects Raft clusters, primary/backup systems, and any architecture where replicas share logic and state. Defend against it with input validation at system boundaries and non-deterministic jitter in retry/recovery paths.
+
 ## Production Checklist
 
 Before deploying distributed system:
@@ -1248,6 +1279,9 @@ Before deploying distributed system:
 - [ ] **Limplock detection**: Monitor operation latency percentiles, not just availability — eject nodes whose latency exceeds cluster median by >10x
 - [ ] **Cache death spiral prevention**: Latency increase → queue buildup → GC pressure → more latency is the most common cascading failure pattern. Bound all queues, implement back-pressure, and limit client retries (Luu, "A decade of major cache incidents at Twitter")
 - [ ] **Configuration change safety**: Treat config changes (feature flags, pool sizes, timeouts) with same rigor as code deploys — 50% of global outages stem from config changes
+- [ ] **Metastable failure resistance**: Fast error paths (reject cheaper than process), bounded retries (token bucket), goodput monitoring, and load shedding at the edge
+- [ ] **Redundancy audit**: Each redundant component meets all 4 conditions — complexity justified, degraded mode tested, health detection reliable, recovery to full redundancy automated
+- [ ] **Poison pill defense**: Replicated state machines validate inputs at boundaries; identical replicas running identical logic on identical state will fail identically
 
 ## When to Use Which Approach
 

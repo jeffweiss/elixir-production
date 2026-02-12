@@ -458,6 +458,16 @@ end
 
 **The key insight**: At scale, the slowest component in any fan-out determines overall latency. A single slow node turns a 10ms operation into a 10-second operation. These techniques bound the damage from slow outliers.
 
+**Tail latency amplifies with fan-out** (Brooker, "Tail Latency Might Matter More Than You Think"): With N parallel backend calls, the probability of hitting at least one slow outlier is `1 - (1 - p)^N`. At p99 with 10 parallel calls, ~10% of requests hit a tail-latency response. With 50 parallel calls, it's ~40%. This transforms tail latency from a theoretical edge case into a dominant factor. Serial call chains are worse: variance compounds by up to 25x compared to single-hop systems. Monitor end-to-end latency across realistic workflows, not just per-service metrics.
+
+## Pool Sizing Economics
+
+**Larger pools need less headroom** (Brooker, "Surprising Economics of Load-Balanced Systems"): Erlang's C formula shows that at the same per-server utilization, larger pools dramatically reduce queuing probability. A 5-server pool at 50% utilization queues only 3.6% of requests; a 2-server pool at the same utilization queues 13%. Most of the benefit comes at modest scale — going from 2 to 10 servers captures most of the improvement.
+
+**Implication for Elixir connection pools**: Don't size `pool_size` purely from "peak concurrent queries." A slightly larger pool at lower per-connection utilization yields disproportionately better tail latency. Benchmark with realistic load patterns — the non-linear queuing improvement means the "right" pool size is often larger than back-of-envelope calculations suggest.
+
+**Simulate before sizing** (Brooker, "Simple Simulations for System Builders"): Formal methods prove correctness but can't answer "what latency should we expect?" or "how much headroom do we need?" Simple Monte Carlo simulations (often < 50 lines of code) reveal non-linear performance "knees" — the utilization threshold where latency suddenly spikes. Run simulations before committing to pool sizes, partition counts, or worker limits.
+
 ## Integration with Other Skills
 
 - **Before optimizing:** Use THIS skill to profile and benchmark
