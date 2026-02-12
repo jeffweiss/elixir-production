@@ -569,11 +569,6 @@ grep "Styler" .formatter.exs
 - [Official Feature-Dev Plugin](https://github.com/anthropics/claude-code/plugins/feature-dev)
 - [Official PR Review Toolkit](https://github.com/anthropics/claude-code/plugins/pr-review-toolkit)
 
-### Philosophies
-- Dave Thomas (PragDave): DDD, functional core/imperative shell, YAGNI
-- Quinn Wilton: Correctness over convenience, production-grade engineering
-- John Ousterhout: "A Philosophy of Software Design" - deep modules, reducing complexity
-
 ## License
 
 MIT License - See LICENSE file for details
@@ -584,9 +579,54 @@ Jeff Weiss
 
 ## Acknowledgments
 
-- Dave Thomas for DDD and functional programming principles
-- Quinn Wilton for correctness-first approach
-- Jeff Weiss's technical patterns gist
+The skills in this plugin draw heavily from the work of many researchers and practitioners.
+
+**Elixir & OTP Community**:
+- Fred Hebert — distributed systems architectural principles, Erlang in Anger
+- Saša Jurić — "To spawn, or not to spawn?", "Beyond Task.Async", OTP process patterns
+- Chris Keathley — "Good and Bad Elixir", telemetry conventions, adaptive concurrency with Regulator
+- Mitch Bernheisel — Safe Ecto Migrations
+
+**Software Design & Philosophy**:
+- Dave Thomas (PragDave) — DDD, functional core/imperative shell, YAGNI
+- Quinn Wilton — correctness over convenience, production-grade engineering
+- John Ousterhout — "A Philosophy of Software Design": deep modules, information hiding, pull complexity downward
+
+**Distributed Systems**:
+- Marc Brooker — metastability, circuit breakers, backoff, redundancy analysis, Physalia, tail latency economics, simulation for system builders
+- Martin Kleppmann — CAP theorem critique, fencing tokens, isolation level testing, data loss probability in large clusters
+- Leslie Lamport — Paxos consensus algorithm
+- Diego Ongaro — Raft consensus algorithm
+- Nathan Bronson — metastable failures in distributed systems
+- James Hamilton — "On Designing and Deploying Internet-Scale Services", dependency SLAs
+- Peng Huang — gray failure in cloud-scale systems
+- Dan McKinley — "Choose Boring Technology", innovation tokens
+
+**Systems Engineering & Reliability**:
+- Richard Cook — "How Complex Systems Fail"
+- Lisanne Bainbridge — "Ironies of Automation"
+- David Woods — the alarm problem, cognitive load during cascading failures
+- Jens Rasmussen — "Going Solid", capacity headroom and system brittleness
+- Dan Luu — concurrency bugs, limplocks, latency measurement pitfalls, normalization of deviance, postmortem analysis
+- Ding Yuan — "Simple Testing Can Prevent Most Critical Failures" (92% of catastrophic failures from incorrect error handling)
+- Jon Kleinberg & Manish Raghavan — algorithmic monoculture and correlated failures
+
+**Performance & Latency**:
+- Jeffrey Dean & Luiz André Barroso — "The Tail at Scale"
+
+**Algorithms & Data Structures**:
+- Chris Okasaki — "Purely Functional Data Structures"
+- Philippe Flajolet — HyperLogLog cardinality estimation
+- Graham Cormode & S. Muthukrishnan — Count-Min Sketch
+- Bin Fan — Cuckoo Filters
+- Yann Collet — xxHash3
+- Jack O'Connor — BLAKE3
+- Geoff Pike & Jyrki Alakuijala — HighwayHash
+- Orson Peters — Pattern-Defeating Quicksort (pdqsort)
+- Stefan Edelkamp & Armin Weiß — BlockQuicksort
+- Matteo Frigo — cache-oblivious algorithms
+
+**Tools & Infrastructure**:
 - Claude Code team for plugin architecture
 - Anthropic for Claude and tooling
 
