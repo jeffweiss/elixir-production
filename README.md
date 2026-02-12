@@ -22,7 +22,7 @@ A comprehensive Claude Code plugin system for production-quality Elixir developm
 - **distributed-systems-expert** - Consensus algorithms and distributed bugs
 - **algorithms-researcher** - Cutting-edge algorithms from recent research
 
-### 📚 6 Progressive Skills
+### 📚 7 Progressive Skills
 
 - **elixir-patterns** - Core Elixir patterns (railway, DDD, OTP)
 - **phoenix-liveview** - LiveView streams, forms, hooks, authentication
@@ -30,6 +30,7 @@ A comprehensive Claude Code plugin system for production-quality Elixir developm
 - **cognitive-complexity** - Cognitive load analysis (Ousterhout philosophy)
 - **distributed-systems** - Consensus, clustering, CAP tradeoffs
 - **algorithms** - Modern algorithms and data structures
+- **performance-analyzer** - Profiling, benchmarking, latency analysis
 
 ### ⚡ 11 Commands
 
@@ -175,94 +176,45 @@ mkdir -p .claude
 cp ~/.claude/plugins/elixir-production/templates/project-learnings.md .claude/
 ```
 
-## Core Concepts
+## Getting the Most Out of the Plugin
 
-### Test-Driven Development (TDD)
+### How the Pieces Fit Together
 
-This plugin enforces strict TDD:
+The plugin has three layers that work together:
 
-1. **Tests before implementation** - Always
-2. **Explore entire result space** - All `{:ok, ...}` and `{:error, ...}` variants
-3. **Red-Green-Refactor** - Failing test → implementation → passing test → improve
-4. **100% coverage** - New code fully tested
+- **Commands** (`/feature`, `/review`, `/precommit`) are your primary interface. Run them directly — they orchestrate everything else.
+- **Agents** are specialists that commands dispatch behind the scenes. Each has a role (architect, developer, reviewer) and a model matched to the task — Opus for deep analysis, Sonnet for implementation work.
+- **Skills** are knowledge bases loaded automatically when relevant. You don't invoke them directly — agents reference them for domain expertise on Elixir patterns, distributed systems, performance, and more.
 
-Example workflow:
+When you run `/feature "Add email verification"`, the feature command dispatches the **elixir-architect** agent (Opus) to design the architecture, waits for your approval, then dispatches the **elixir-developer** agent (Sonnet) to implement with TDD. Both agents pull from skills like **elixir-patterns** and **production-quality** for domain knowledge.
 
-```elixir
-# 1. Write comprehensive tests FIRST
-describe "create_user/1 - Success Cases" do
-  test "creates user with valid attributes"
-  test "creates user with optional fields"
-end
+### Picking the Right Command
 
-describe "create_user/1 - Error Cases" do
-  test "returns error with missing required fields"
-  test "returns error with invalid email"
-  test "returns error with duplicate email"
-end
+| What you're doing | Command |
+|---|---|
+| Building something new | `/feature` — architect designs, you approve, developer implements |
+| Checking code quality | `/review` — reviews against production standards |
+| Before committing | `/precommit` — compile, format, credo, test |
+| Exploring an idea fast | `/spike` — skip production requirements, iterate quickly |
+| SPIKE code is stable | `/spike-migrate` — upgrade to production quality with TDD |
+| Performance questions | `/benchmark` — create and run Benchee benchmarks |
+| PR ready for review | `/pr-review 123` — posts review as PR comment |
+| Distributed system concerns | `/distributed-review` — consensus, clustering, partitions |
+| Need a better algorithm | `/algorithm-research` — research with paper citations |
+| Code feels complex | `/cognitive-audit` — cognitive load analysis |
+| Learned something useful | `/learn "pattern"` — captures in project-learnings.md |
 
-# 2. Implement to make tests pass
-# 3. Refactor while tests stay green
-```
+### What to Expect
 
-### Confidence-Based Reporting
+**TDD is enforced.** Agents write tests before implementation, covering all `{:ok, ...}` and `{:error, ...}` variants. Tests are rated by business criticality (1-10) so critical paths (9-10) get tested first. Use `/spike` if you need to skip this temporarily.
 
-Reviews only report high-confidence issues (≥80%):
+**Reviews filter noise.** Only issues with ≥80% confidence are reported — Critical (90-100%) for missing typespecs and security issues, Important (80-89%) for logic bugs and pattern violations. Nothing speculative.
 
-```
-[Critical] Missing typespec (Confidence: 95%)
-[Important] Missing error handling (Confidence: 85%)
+**Skills scale depth to your problem.** Each skill uses an escalation ladder (L0 through L5+). A simple question gets a quick reference answer. A complex architectural problem gets deep analysis with citations and tradeoff evaluation.
 
-# Issues below 80% confidence are NOT reported
-```
+**Project knowledge accumulates.** Use `/learn` to capture patterns in `.claude/project-learnings.md`. All agents read this file, so they stay consistent with your project's conventions over time.
 
-This reduces noise and focuses on actionable feedback.
-
-### Criticality Ratings
-
-Tests are rated 1-10 based on business risk:
-
-```
-10: Financial data, security, data loss
-9:  Core business logic
-8:  Error handling, data integrity
-7:  Edge cases, boundaries
-6:  UX improvements
-5:  Convenience features
-...
-```
-
-Focus on critical tests first (9-10).
-
-### SPIKE Mode
-
-Fast prototyping without production requirements:
-
-- Skip typespecs
-- Minimal tests (smoke tests only)
-- Mark code with `# SPIKE: reason`
-- Track in `.claude/spike-debt.md`
-- Easy migration when patterns stabilize
-
-### project-learnings.md
-
-Auto-updated knowledge base:
-
-```markdown
-## Architecture Decisions
-- [Date] Feature X uses GenServer pool because Y
-
-## Domain Conventions
-- Always pass current_scope as first argument
-
-## Performance Patterns
-- Product queries: Always preload [:category, :vendor]
-
-## Common Gotchas
-- LiveView stream IDs: Use "prefix-#{id}" format
-```
-
-Agents read this file to ensure consistency with project patterns.
+**SPIKE mode gives you an escape hatch.** `/spike` lets you prototype without typespecs, with minimal tests, marking code with `# SPIKE: reason`. Debt is tracked in `.claude/spike-debt.md`. When the approach is validated, `/spike-migrate` brings it to production quality.
 
 ## Workflows
 
@@ -418,33 +370,51 @@ Hooks enforce this automatically. No broken code enters version control.
 ```
 ~/.claude/plugins/elixir-production/
 ├── .claude-plugin/
-│   └── plugin.json              # Plugin manifest
-├── agents/
-│   ├── elixir-architect.md      # Feature design (Opus)
-│   ├── elixir-developer.md      # TDD implementation (Sonnet)
-│   ├── elixir-reviewer.md       # Code review
-│   └── test-designer.md         # Test strategy
-├── skills/
-│   ├── elixir-patterns/         # Core patterns
-│   │   ├── SKILL.md
-│   │   └── references/
-│   └── production-quality/      # Quality standards
-│       └── SKILL.md
-├── commands/
-│   ├── precommit.md             # Quality gate
-│   ├── feature.md               # Feature workflow
-│   └── review.md                # Code review
+│   └── plugin.json                # Plugin manifest
+├── agents/                        # 10 specialized agents
+│   ├── elixir-architect.md        # Feature design (Opus)
+│   ├── elixir-developer.md        # TDD implementation (Sonnet)
+│   ├── elixir-reviewer.md         # Code review (Sonnet)
+│   ├── test-designer.md           # Test strategy (Sonnet)
+│   ├── phoenix-expert.md          # LiveView specialist (Sonnet)
+│   ├── performance-analyzer.md    # Profiling/benchmarks (Sonnet)
+│   ├── pr-reviewer.md             # GitHub PR automation (Sonnet)
+│   ├── cognitive-scientist.md     # Cognitive load (Opus)
+│   ├── distributed-systems-expert.md  # Consensus/clustering (Opus)
+│   └── algorithms-researcher.md   # Algorithm research (Opus)
+├── skills/                        # 7 progressive skills
+│   ├── algorithms/                # SKILL.md + 4 reference files
+│   ├── cognitive-complexity/      # SKILL.md + escalation + references/
+│   ├── distributed-systems/       # SKILL.md + 7 reference files
+│   ├── elixir-patterns/           # SKILL.md + 4 reference files
+│   ├── performance-analyzer/      # SKILL.md + 4 reference files
+│   ├── phoenix-liveview/          # SKILL.md + escalation + references/
+│   └── production-quality/        # SKILL.md + 6 reference files
+├── commands/                      # 11 slash commands
+│   ├── precommit.md               # Quality gate
+│   ├── feature.md                 # Feature workflow
+│   ├── review.md                  # Code review
+│   ├── cognitive-audit.md         # Complexity analysis
+│   ├── spike.md                   # Rapid prototyping
+│   ├── spike-migrate.md           # SPIKE to production
+│   ├── benchmark.md               # Benchee benchmarks
+│   ├── pr-review.md               # GitHub PR review
+│   ├── learn.md                   # Knowledge capture
+│   ├── distributed-review.md      # Distributed systems
+│   └── algorithm-research.md      # Algorithm research
 ├── hooks/
-│   ├── hooks.json               # Hook configuration
+│   ├── hooks.json                 # Hook configuration
 │   └── scripts/
-│       ├── validate-precommit.sh # Code quality validation
-│       ├── check-complexity.sh   # Cognitive complexity checks
-│       └── validate-dependencies.sh # Dependency validation
+│       ├── validate-precommit.sh
+│       ├── check-complexity.sh
+│       └── validate-dependencies.sh
 └── templates/
-    ├── AGENTS.md                # For new projects
-    ├── CLAUDE.md                # For new projects
-    ├── project-learnings.md     # Knowledge template
-    └── spike-debt.md            # Debt tracking template
+    ├── AGENTS.md                  # For new projects
+    ├── CLAUDE.md                  # For new projects
+    ├── .formatter.exs             # Formatter config
+    ├── mix-deps-snippet.exs       # Required dependencies
+    ├── project-learnings.md       # Knowledge template
+    └── spike-debt.md              # Debt tracking template
 ```
 
 ### State-of-the-Art Patterns
@@ -471,9 +441,9 @@ This plugin incorporates patterns from official Claude Code plugins:
    - Self-documenting capabilities
 
 5. **Progressive disclosure** (plugin-dev skills)
-   - Lean core (~1500-2000 words)
+   - Lean SKILL.md core (<500 words)
    - Deep references in subdirectories
-   - Explicit triggering phrases
+   - "Use when..." descriptions for discovery
 
 6. **Path portability** (universal pattern)
    - ${CLAUDE_PLUGIN_ROOT} for all internal paths
@@ -481,55 +451,9 @@ This plugin incorporates patterns from official Claude Code plugins:
 
 ## Status & Roadmap
 
-### ✅ Fully Implemented (v1.1.4)
+### ✅ Fully Implemented (v2.0.0)
 
-All components are complete and production-ready:
-
-**Agents (10/10)**:
-- ✅ elixir-architect (Opus) - Feature design with complexity analysis
-- ✅ elixir-developer (Sonnet) - TDD-focused implementation
-- ✅ elixir-reviewer (Sonnet) - Confidence-based code review
-- ✅ test-designer (Sonnet) - Test strategy with criticality ratings
-- ✅ phoenix-expert (Sonnet) - LiveView/Phoenix specialist
-- ✅ performance-analyzer (Sonnet) - Profiling and benchmarks
-- ✅ pr-reviewer (Sonnet) - GitHub PR automation
-- ✅ cognitive-scientist (Opus) - Cognitive load analysis
-- ✅ distributed-systems-expert (Opus) - Consensus and clustering
-- ✅ algorithms-researcher (Opus) - Cutting-edge algorithm research
-
-**Skills (6/6)**:
-- ✅ elixir-patterns - Core Elixir patterns (railway, DDD, OTP)
-- ✅ phoenix-liveview - LiveView streams, forms, hooks, auth
-- ✅ production-quality - Quality standards and workflows
-- ✅ cognitive-complexity - Ousterhout philosophy
-- ✅ distributed-systems - Consensus, clustering, CAP tradeoffs
-- ✅ algorithms - Modern algorithms and data structures
-
-**Commands (11/11)**:
-- ✅ /precommit - Quality gate (compile, format, credo, test)
-- ✅ /feature - Guided TDD workflow with parallel exploration
-- ✅ /review - Comprehensive code review
-- ✅ /cognitive-audit - Cognitive complexity analysis
-- ✅ /spike - Rapid prototyping mode
-- ✅ /spike-migrate - Upgrade SPIKE to production quality
-- ✅ /benchmark - Benchee benchmark creation and analysis
-- ✅ /pr-review - GitHub PR review automation
-- ✅ /learn - Knowledge capture in project-learnings.md
-- ✅ /distributed-review - Distributed systems analysis
-- ✅ /algorithm-research - Algorithm research with citations
-
-**Automation**:
-- ✅ hooks.json configuration
-- ✅ PreToolUse quality reminders for Elixir files
-- ✅ PostToolUse validation
-
-### Future Enhancements
-
-- Video/GIF demos
-- Example workflow walkthroughs
-- Team onboarding guide
-- Migration guide for existing projects
-- CI/CD integration templates
+All 10 agents, 7 skills, and 11 commands are complete and production-ready. Skills follow progressive disclosure: lean SKILL.md (<500 words) with deep reference files for domain knowledge.
 
 ## Contributing
 
@@ -558,21 +482,24 @@ Use **sonnet/opus/haiku** model for [reasoning].
 ### Adding a Skill
 
 ```markdown
+---
+name: skill-name
+description: Use when [specific triggering conditions]
+---
+
 # Skill Name
 
-## Skill Identity
-[Description and purpose]
+## Overview
+[Core principle in 1-2 sentences]
 
-## Triggers
-- <example>"trigger phrase"</example>
-- <example>"another phrase"</example>
+## Quick Reference
+[Table or bullets for scanning]
 
-## Core Content
-[~1500-2000 words of knowledge]
-
-## Additional References
-[Links to reference files]
+## Common Mistakes
+[What goes wrong + fixes]
 ```
+
+SKILL.md should be <500 words. Put deep reference material in separate files within the skill directory.
 
 ### Adding a Command
 
@@ -665,4 +592,4 @@ Jeff Weiss
 
 ---
 
-**Version**: 1.1.5 - All 10 agents, 6 skills, and 11 commands are fully implemented and production-ready.
+**Version**: 2.0.0 - All 10 agents, 7 skills, and 11 commands are fully implemented and production-ready.
