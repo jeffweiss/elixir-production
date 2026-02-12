@@ -386,6 +386,48 @@ Then create a baseline benchmark:
 Only after seeing profiling data can we identify the actual bottleneck."
 ```
 
+## Tail Latency Reduction (After Profiling Confirms Latency Problem)
+
+When profiling shows that p99/p999 latency is significantly worse than median, and the system fans out to multiple backends or partitions, these techniques reduce tail latency (Dean & Barroso, "The Tail at Scale"):
+
+| Technique | How It Works | Overhead | When to Use |
+|-----------|-------------|----------|-------------|
+| **Hedged requests** | Send to backup after p95 timeout of primary | ~5% extra load | Fan-out queries to sharded data |
+| **Tied requests** | Enqueue on multiple servers, cancel duplicates when one completes | Minimal with cancellation | Load-balanced worker pools |
+| **Micro-partitioning** | 20× more partitions than servers for fine-grained rebalancing | Management complexity | Sharded stateful services |
+| **Latency probation** | Temporarily exclude slow nodes, send shadow requests to monitor recovery | Shadow request load | Heterogeneous node fleet |
+| **Canary requests** | Test on small subset before full fan-out | One extra round-trip | High fan-out queries (100+ nodes) |
+
+```elixir
+# Hedged request — send backup after p95 timeout
+defmodule HedgedRequest do
+  def query(nodes, request, opts \\ []) do
+    p95_timeout = Keyword.get(opts, :hedge_after_ms, 50)
+
+    primary = Enum.random(nodes)
+    backup = Enum.random(nodes -- [primary])
+
+    task1 = Task.async(fn -> rpc_call(primary, request) end)
+
+    # Wait for primary up to p95 timeout
+    case Task.yield(task1, p95_timeout) do
+      {:ok, result} ->
+        result
+      nil ->
+        # Primary is slow — hedge with backup
+        task2 = Task.async(fn -> rpc_call(backup, request) end)
+        case Task.yield_many([task1, task2], 5_000) do
+          [{^task1, {:ok, r}}, _] -> Task.shutdown(task2, :brutal_kill); r
+          [_, {^task2, {:ok, r}}] -> Task.shutdown(task1, :brutal_kill); r
+          _ -> {:error, :timeout}
+        end
+    end
+  end
+end
+```
+
+**The key insight**: At scale, the slowest component in any fan-out determines overall latency. A single slow node turns a 10ms operation into a 10-second operation. These techniques bound the damage from slow outliers.
+
 ## Integration with Other Skills
 
 - **Before optimizing:** Use THIS skill to profile and benchmark

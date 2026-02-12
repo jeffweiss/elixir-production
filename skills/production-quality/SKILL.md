@@ -227,6 +227,28 @@ Supervisor.init(children, strategy: :one_for_one)
 
 **Monitor capacity headroom, not just utilization**: The transition from resilient to brittle is sudden and nonlinear — a system at 85% capacity can absorb a traffic spike, while one at 95% cannot (Cook & Rasmussen, "Going Solid"). Alert on *remaining capacity* rather than current utilization: pool checkout wait times trending upward, queue depths growing faster than drain rates, scheduler utilization exceeding 70%. By the time utilization hits 100%, the system has already gone solid.
 
+**Detect gray failures through differential observability**: A component can appear healthy to its own health checks while being unhealthy from the perspective of its consumers — this is a *gray failure* (Huang et al., "Gray Failure"). A database may respond to pings but drop 10% of queries. A service may pass readiness probes but return errors to specific callers. Detection requires observing health from *multiple vantage points*: not just "is the service up?" but "is the service working for its actual consumers?" Collect health signals from both the provider and its dependents, and alert when they diverge.
+
+```elixir
+# ❌ Single-perspective health check — misses gray failures
+def health_check do
+  case MyApp.Repo.query("SELECT 1") do
+    {:ok, _} -> :healthy
+    _ -> :unhealthy
+  end
+end
+
+# ✅ Multi-perspective health check — detects differential observability
+def health_check do
+  %{
+    self_check: MyApp.Repo.query("SELECT 1"),
+    consumer_error_rate: Telemetry.get_counter([:my_app, :repo, :errors]) |> rate_per_minute(),
+    consumer_p99_latency: Telemetry.get_summary([:my_app, :repo, :query_time]) |> p99()
+  }
+  |> evaluate_health()
+end
+```
+
 **This level means**: When something goes wrong in production, you can diagnose it without adding new instrumentation.
 
 **Move to Level 7 when**: Telemetry covers all four layers and drives actionable alerts.
@@ -477,6 +499,38 @@ end
 ```
 
 ## Testing Strategy
+
+### The Error Handling Imperative
+
+A study of 198 catastrophic failures in distributed systems found that **92% were caused by incorrect error handling** — not algorithmic bugs (Yuan et al., "Simple Testing Can Prevent Most Critical Failures"). Of those, **77% could be reproduced with unit tests**. Three patterns caused nearly all of them:
+
+1. **Ignored errors**: `catch` blocks that swallow exceptions or error tuples matched but not acted on
+2. **TODO/FIXME error handlers**: Placeholder handlers that were never implemented (`# TODO: handle this properly`)
+3. **Overly broad exception catching**: `rescue _ ->` or `catch :exit, _ ->` that masks real failures
+
+```elixir
+# ❌ Pattern 1: Ignored error
+case Repo.insert(changeset) do
+  {:ok, record} -> record
+  {:error, _changeset} -> nil  # Silently returns nil — caller has no idea it failed
+end
+
+# ❌ Pattern 2: TODO handler
+try do
+  ExternalService.call(params)
+rescue
+  _ -> nil  # TODO: handle this properly
+end
+
+# ❌ Pattern 3: Overly broad catch
+try do
+  risky_operation()
+catch
+  :exit, _ -> :ok  # Swallows ALL exit reasons — hides real failures
+end
+```
+
+**Actionable rule**: Write explicit error-handling tests for every `{:error, _}` branch and every `rescue`/`catch` block. If a test doesn't exist for the error path, it's likely broken.
 
 ### Test-Driven Development (TDD)
 
@@ -915,6 +969,14 @@ def process(params) do
   Map.merge(@defaults, params)
 end
 ```
+
+### Dependent Services Inherit Your SLA
+
+If your service depends on another service, that dependency must meet the same SLA as your service — or you need a degraded-mode path that doesn't require it (Hamilton, "On Designing and Deploying Internet-Scale Services"). A 99.99% service that hard-depends on a 99.9% service is a 99.9% service. Audit all external dependencies and design fallbacks for each.
+
+### Quality Assurance is a Data Mining Problem
+
+At sufficient scale, quality assurance shifts from "run the test suite" to "analyze production telemetry for anomalies" (Hamilton). Unit and integration tests catch known failure modes. Production metrics catch unknown failure modes. Invest in both, but as system scale grows, the ratio shifts toward observability.
 
 ### Crash Early, Not Silently
 

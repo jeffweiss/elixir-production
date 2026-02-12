@@ -896,6 +896,48 @@ end
 
 **Testing asymmetric partitions**: Use `toxiproxy` or `iptables` rules that drop traffic in one direction only. Most network partition test tools (including Erlang's `:net_kernel.disconnect/1`) simulate symmetric partitions and will miss these bugs.
 
+### Gray Failures
+
+**Problem**: A component appears healthy to its own health checks but is failing from the perspective of its consumers. This *differential observability* makes gray failures the most dangerous class of distributed failure — they bypass all standard detection mechanisms (Huang et al., "Gray Failure: The Achilles Heel of Cloud-Scale Systems").
+
+**Why this is dangerous in Elixir/OTP**: A GenServer may respond to `:ping` but silently drop or delay actual work requests. A database connection pool may report available connections while queries time out. A node may participate in `:pg` groups but not actually process messages.
+
+**Common gray failure patterns**:
+- **Partial network degradation**: 10% packet loss — health checks pass, real traffic fails
+- **Resource exhaustion**: Process heap growing, GC pauses increasing — still "alive" but effectively stuck
+- **Redundancy paradox**: With N dependencies, the probability of *at least one* being gray-failed approaches certainty at scale. More fan-out = more exposure to gray failures.
+
+**Detection strategy — multi-perspective health**:
+```elixir
+defmodule GrayFailureDetector do
+  @doc """
+  Compare a service's self-reported health with its consumers' observed health.
+  Divergence = gray failure.
+  """
+  def check(service) do
+    self_health = service.health_check()
+    consumer_signals = %{
+      error_rate: Telemetry.rate([:service, :errors], :per_minute),
+      p99_latency: Telemetry.percentile([:service, :latency], 99),
+      timeout_rate: Telemetry.rate([:service, :timeouts], :per_minute)
+    }
+
+    case {self_health, consumer_signals} do
+      {:healthy, %{error_rate: rate}} when rate > 0.01 ->
+        {:gray_failure, :error_rate_divergence, consumer_signals}
+      {:healthy, %{p99_latency: lat}} when lat > 5_000 ->
+        {:gray_failure, :latency_divergence, consumer_signals}
+      {:healthy, _} ->
+        :healthy
+      {:unhealthy, _} ->
+        :unhealthy  # At least it's honest
+    end
+  end
+end
+```
+
+**Mitigation**: Don't rely solely on self-reported health. Monitor the *relationship* between components, not just the components themselves.
+
 ### Race Conditions in Distributed State
 
 **Problem**: Concurrent updates from different nodes
@@ -1117,6 +1159,50 @@ end
 | Split-brain prevention | Quorum + fencing | :ra, external coordinator |
 | Causal ordering | Vector clocks | manual implementation |
 
+## Blast Radius Reduction (Cell-Based Architecture)
+
+The most effective distributed architecture strategy is limiting the damage any single failure can cause. Instead of one monolithic service with shared state, partition into independent *cells* — each serving a subset of users or keys, failing independently (Brooker et al., "Millions of Tiny Databases" — AWS Physalia).
+
+**Core principles**:
+- **Smaller blast radius > better availability**: A cell serving 1% of traffic that goes down is a 1% outage, not a 100% outage
+- **Independent failure domains**: Cells share no state, no connections, no coordinators. One cell's failure cannot cascade to another
+- **Deployment segregation via "colors"**: Deploy updates to one color (cell group) at a time. Bad deploys affect one color, not the whole fleet
+
+**Applying this in Elixir/OTP**:
+```elixir
+# Cell-per-tenant with supervision isolation
+defmodule MyApp.CellSupervisor do
+  use DynamicSupervisor
+
+  def start_cell(tenant_id) do
+    # Each tenant gets its own supervision tree — isolated failure domain
+    DynamicSupervisor.start_child(__MODULE__, {
+      MyApp.TenantCell, tenant_id: tenant_id
+    })
+  end
+end
+
+defmodule MyApp.TenantCell do
+  use Supervisor
+
+  def start_link(opts) do
+    tenant_id = Keyword.fetch!(opts, :tenant_id)
+    Supervisor.start_link(__MODULE__, tenant_id, name: via(tenant_id))
+  end
+
+  def init(tenant_id) do
+    children = [
+      {MyApp.TenantCache, tenant_id},
+      {MyApp.TenantWorker, tenant_id}
+    ]
+    # max_restarts scoped to THIS tenant only
+    Supervisor.init(children, strategy: :one_for_all)
+  end
+end
+```
+
+**When to apply**: Any system where a shared resource (pool, GenServer, ETS table, Raft cluster) serves all tenants. Partition it so one tenant's thundering herd doesn't take down another's service.
+
 ## Production Checklist
 
 Before deploying distributed system:
@@ -1132,6 +1218,9 @@ Before deploying distributed system:
 - [ ] **Failure modes**: Test with Chaos Monkey, network partition simulation
 - [ ] **Observability**: Distributed metrics, logging with trace_id
 - [ ] **Strategy diversity**: Avoid identical retry/timeout/health-check logic across all services — correlated strategies create correlated failures (algorithmic monoculture)
+- [ ] **Blast radius**: Shared resources (pools, GenServers, Raft clusters) partitioned so one tenant/group failure doesn't cascade to all
+- [ ] **Gray failure detection**: Health checks include consumer-perspective signals, not just self-checks
+- [ ] **Dependency SLAs**: Every external dependency has a degraded-mode path or its SLA is accepted as your SLA ceiling
 
 ## When to Use Which Approach
 
