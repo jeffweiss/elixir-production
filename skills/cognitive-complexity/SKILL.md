@@ -707,6 +707,31 @@ import CustomBehavior
 implement_callbacks()
 ```
 
+### 5. Three Cognitive Levels in Interface Design
+
+Design dashboards, error messages, and operational interfaces to serve three distinct cognitive levels (Rasmussen, "Skills, Rules, Knowledge" framework):
+
+| Level | Operator Mode | Information Type | Design Implication |
+|-------|--------------|------------------|--------------------|
+| **Skill-based** | Automatic response, pattern recognition | Signals (spatial patterns, colors, trends) | Use sparklines, color-coded status, spatial layouts that experienced operators recognize at a glance |
+| **Rule-based** | Following procedures, if-then logic | Signs (meaningful indicators) | Provide clear indicators that map to runbook steps: "queue depth > 1000 → scale up workers" |
+| **Knowledge-based** | Novel problem-solving, reasoning | Symbols (raw data, logs, metrics) | Provide raw data access, query tools, and correlation views for investigating unfamiliar failures |
+
+Most dashboards only serve the knowledge level (raw metrics requiring interpretation). Experienced operators work at the skill level most of the time — they need spatial patterns they can absorb peripherally, not numbers they must read and interpret.
+
+```elixir
+# ❌ Knowledge-level only — requires reading and interpreting each number
+Logger.info("Pool: #{pool_size}, Active: #{active}, Idle: #{idle}, Wait: #{wait_ms}ms")
+
+# ✅ Multi-level — skill (pattern), rule (threshold), knowledge (raw data)
+:telemetry.execute(
+  [:my_app, :db_pool, :status],
+  %{utilization_pct: active / pool_size * 100, wait_ms: wait_ms},
+  %{pool_size: pool_size, active: active, idle: idle}
+)
+# Dashboard: color bar (skill) + threshold alert (rule) + raw numbers (knowledge)
+```
+
 ## Refactoring for Cognitive Clarity
 
 ### Pattern 1: Extract Deep Module

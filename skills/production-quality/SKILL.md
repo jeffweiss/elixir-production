@@ -204,6 +204,29 @@ Logger.info("Database query completed",
 
 **A 100% healthy system is suspicious**: If monitoring shows zero errors, zero latency spikes, and zero warnings, the most likely explanation is broken monitoring — not a perfect system.
 
+**Alerts should direct attention, not just report conditions**: The most common alerting failure is flooding operators with context-free notifications during cascading failures — exactly when cognitive load is highest (Woods, "The Alarm Problem"). Design alerts that answer: What changed? What's the impact? Where should I look first? Emphasize *departures from baseline* rather than absolute thresholds, and use spatial/temporal patterns that support preattentive processing (color changes, trend lines) rather than requiring operators to read and interpret each alert individually.
+
+**Make automated interventions visible**: OTP supervision trees restart crashed processes automatically — which is correct. But invisible automation creates a dangerous gap: operators lose awareness of what the system is doing on their behalf (Bainbridge, "Ironies of Automation"). Log every supervisor restart with context (which child, how many times, how recently). Emit telemetry for restart frequency. If a process restarts 50 times in an hour but "works," that's a walking-dead system — the bug is being hidden, not fixed.
+
+```elixir
+# ❌ Invisible automation — restarts hide the problem
+children = [
+  {MyWorker, []}
+]
+Supervisor.init(children, strategy: :one_for_one)
+
+# ✅ Visible automation — restarts are tracked and alertable
+:telemetry.execute(
+  [:my_app, :supervisor, :restart],
+  %{count: 1},
+  %{child: child_id, reason: reason, supervisor: __MODULE__}
+)
+```
+
+**Systems always run in degraded mode**: Complex systems are never fully healthy — components are always partially broken, recently repaired, or operating outside design parameters (Cook, "How Complex Systems Fail"). Health checks that require every component to be perfect will fire constantly. Design health checks around *acceptable degradation*: the system is healthy when it can serve its core purpose, even if some subsystems are impaired.
+
+**Monitor capacity headroom, not just utilization**: The transition from resilient to brittle is sudden and nonlinear — a system at 85% capacity can absorb a traffic spike, while one at 95% cannot (Cook & Rasmussen, "Going Solid"). Alert on *remaining capacity* rather than current utilization: pool checkout wait times trending upward, queue depths growing faster than drain rates, scheduler utilization exceeding 70%. By the time utilization hits 100%, the system has already gone solid.
+
 **This level means**: When something goes wrong in production, you can diagnose it without adding new instrumentation.
 
 **Move to Level 7 when**: Telemetry covers all four layers and drives actionable alerts.
