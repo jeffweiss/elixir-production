@@ -83,11 +83,15 @@ members = :pg.get_members(:my_group)
 |------|----------|-------------|
 | Counters that survive partitions | PN-Counters | `delta_crdt` |
 | Distributed key-value | Add-wins LWW Map | `delta_crdt` (AWLWWMap) |
+| Ephemeral distributed KV | LWW Registers + HLC | `groot` |
+| Feature flags (distributed) | LWW Registers + HLC | `rollout` (built on `groot`) |
 | Set membership across partitions | Observed-Remove Set | `delta_crdt` (ORSet) |
 | Conflict resolution | CRDTs (automatic) or app-level merge | `delta_crdt`, `lasp` |
-| Causal ordering of events | Vector clocks or HLCs | Manual implementation |
+| Causal ordering of events | Vector clocks or HLCs | `hlclock` (HLC) or manual (vector clocks) |
 
 **Tradeoff**: All nodes stay **available** during partitions, but may temporarily serve stale data. Conflicts resolve automatically (CRDTs) or require application-level merge logic.
+
+**Replicate for local reads**: Gossip-based writes propagate state to all nodes; each node materializes into a local ETS table for microsecond reads. This separates the write path (distributed, eventually consistent) from the read path (local, fast). `groot` and `rollout` use this pattern — writes gossip via `delta_crdt`, reads hit local ETS.
 
 ## Level 5: Large-Scale / Multi-Datacenter
 

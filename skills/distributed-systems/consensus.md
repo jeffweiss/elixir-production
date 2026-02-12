@@ -189,7 +189,10 @@ DeltaCrdt.mutate(set, :remove, ["element"])
 
 **Libraries**:
 - `delta_crdt` - Production-ready
+- `groot` - Ephemeral distributed KV using LWW registers with HLC timestamps
 - `lasp` - Research-grade, advanced
+
+**Composable primitives**: The `hlclock` → `groot` → `rollout` stack (elixir-toniq) demonstrates building distributed systems from small, composable libraries. `hlclock` provides hybrid logical clocks for causal ordering. `groot` layers LWW-register-based distributed KV on top. `rollout` adds feature flag semantics over `groot`. Each library does one thing and composes upward — a practical alternative to monolithic distributed frameworks.
 
 ## Vector Clocks
 

@@ -16,6 +16,7 @@ Before reaching for external libraries, use what Erlang/OTP provides. Battle-tes
 | `:array` | Functional sparse array | Integer-indexed data with gaps; default values for missing indices |
 | `:atomics` | Lock-free integer array | Concurrent counters, flags; shared mutable state without process bottleneck |
 | `:counters` | Concurrent counters | High-throughput counting; write-optimized |
+| `circular_buffer` | Fixed-size ring buffer | Sliding window; recent metrics, rate limiting |
 
 ## Usage Examples
 
@@ -62,6 +63,7 @@ Chris Okasaki's "Purely Functional Data Structures" (1998) established foundatio
 | Situation | Consider |
 |-----------|----------|
 | O(1) queue operations | `:queue` (already Okasaki-derived) |
+| Fixed-size sliding window | `circular_buffer` — Okasaki paired-list (like `:queue`) with Enumerable/Collectable |
 | Priority queue/heap | Pairing heap — `heap` library |
 | Snapshotting state for undo/audit | Persistent structures give this for free |
 | Large indexed collections | Erlang's `:array` covers most cases |

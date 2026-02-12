@@ -251,3 +251,27 @@ end
 ```
 
 **Don't comment**: What the code does (should be obvious), redundant information.
+
+## Production Experiments (Scientist Pattern)
+
+Run old code (control) and new code (candidate) side-by-side in production. Always return the control result — safe by default. Capture durations, exceptions, and mismatches for analysis without risking user-facing behavior.
+
+```elixir
+# Using alchemy (elixir-toniq)
+experiment =
+  Alchemy.new("billing-calculation")
+  |> Alchemy.control(fn -> OldBilling.calculate(invoice) end)
+  |> Alchemy.candidate(fn -> NewBilling.calculate(invoice) end)
+  |> Alchemy.run()
+
+# experiment.value contains the control result (always returned to caller)
+# experiment.mismatched? flags when control and candidate disagree
+# experiment.control.duration / experiment.candidate.duration for timing comparison
+```
+
+**Key properties**:
+- **Sequential execution**: Control runs first, then candidate — avoids timeout surprises from parallel execution doubling resource usage
+- **Safe by default**: Candidate exceptions are captured, never propagated to the caller
+- **Observable**: Publish mismatches, durations, and exceptions to your telemetry pipeline for analysis
+
+**When to use**: Safe refactoring of critical paths, algorithm migration, database query optimization — anywhere you need confidence that new code produces identical results before switching over.

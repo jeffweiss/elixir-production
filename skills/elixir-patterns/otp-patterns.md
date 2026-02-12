@@ -199,6 +199,29 @@ Logger.metadata(request_id: conn.assigns.request_id)
 Process.put(:current_user, user)
 ```
 
+### Process Dictionary for Request-Scoped Context
+
+The process dictionary is pragmatic for values that would otherwise need threading through every function signature in a call chain. Logger metadata already uses this pattern. Appropriate for:
+
+- **Deadline propagation**: Set a request deadline at the boundary, check it deep in the call stack without passing it through every intermediate function. Library: `deadline` (elixir-toniq).
+- **Trace IDs / telemetry span context**: OpenTelemetry stores span context in the process dictionary.
+- **Request-scoped metadata**: Audit user ID, tenant ID for multi-tenant systems.
+
+```elixir
+# deadline — propagate timeout budget through the call stack
+# Set at the boundary (plug, consumer, GenServer call handler)
+Deadline.set(timeout_ms)
+
+# Check deep in the call stack — no need to pass through intermediaries
+if Deadline.expired?() do
+  {:error, :deadline_exceeded}
+else
+  do_expensive_work()
+end
+```
+
+**Trade-off**: The process dictionary is mutable global state within a process. It bypasses explicit data flow, making code harder to reason about in isolation. **Rule**: only use for request-scoped cross-cutting concerns that would otherwise pollute every function signature in the call chain. Never for business logic state.
+
 **Monotonic vs system time**: Use `System.monotonic_time/1` for measuring durations. Use `DateTime.utc_now/0` for timestamps displayed to humans. Never use wall-clock time for durations.
 
 **Binary coalescence**: Never concatenate binaries in a loop. Collect chunks in a list and combine once with `IO.iodata_to_binary/1`.

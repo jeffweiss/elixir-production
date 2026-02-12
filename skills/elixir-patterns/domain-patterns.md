@@ -151,3 +151,11 @@ defmodule MyApp.Accounts.User do
   end
 end
 ```
+
+## Runtime Configuration Gotcha
+
+Libraries that call `System.get_env/1` at compile time or during dependency startup (before your `config/runtime.exs` runs) can't benefit from runtime config. This is a common source of "works locally, breaks in production" bugs.
+
+**Workaround**: Use library-specific init callbacks that run after application start. For example, Goth's `init/1` callback fetches credentials at runtime rather than compile time.
+
+**Lesson from Vapor** (elixir-toniq): Vapor layers configuration providers (system env, dotenv, JSON, YAML, etcd) and validates per-provider, not globally. This catches misconfiguration early — a missing env var fails on the env provider, not as a nil deep in application logic. The pattern applies broadly: validate configuration at the boundary where it's loaded, not where it's consumed.

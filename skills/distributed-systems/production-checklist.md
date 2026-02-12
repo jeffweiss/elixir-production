@@ -10,7 +10,7 @@ Before deploying distributed system:
 - [ ] **Cluster size**: Use Partisan if >50 nodes
 - [ ] **Service discovery**: Configure libcluster for environment
 - [ ] **Monitoring**: Set up distributed tracing (telemetry, OpenTelemetry)
-- [ ] **Failure modes**: Test with Chaos Monkey, network partition simulation
+- [ ] **Failure modes**: Test with Chaos Monkey, network partition simulation (`schism` for ExUnit-based partition testing via cookie-based node isolation)
 - [ ] **Observability**: Distributed metrics, logging with trace_id
 - [ ] **Strategy diversity**: Avoid identical retry/timeout/health-check logic across all services — correlated strategies create correlated failures (algorithmic monoculture)
 - [ ] **Blast radius**: Shared resources (pools, GenServers, Raft clusters) partitioned so one tenant/group failure doesn't cascade to all

@@ -37,9 +37,12 @@ See `escalation-ladder.md` for full details on each level with code examples and
 | Service discovery | DNS, Consul, K8s | libcluster |
 | Distributed state sync | PubSub | Phoenix.PubSub |
 | Presence tracking | CRDT-based tracker | Phoenix.Tracker |
-| Clock synchronization | Hybrid Logical Clocks | manual implementation |
+| Clock synchronization | Hybrid Logical Clocks | hlclock |
+| Ephemeral distributed KV | LWW Registers + HLC | groot |
+| Feature flags (distributed) | LWW Registers + HLC | rollout |
 | Split-brain prevention | Quorum + fencing | :ra, external coordinator |
-| Causal ordering | Vector clocks | manual implementation |
+| Causal ordering | Vector clocks | hlclock (HLC) or manual (vector clocks) |
+| Partition testing | Cookie-based node isolation | schism |
 
 ## Common Mistakes
 
