@@ -50,6 +50,10 @@ What are you solving?
 - `references/contexts.md` — Full context design patterns, boundaries, anti-patterns, testing
 - `async-processing.md` — GenServer vs Oban vs Broadway decision framework, Oban worker patterns, Broadway pipeline architecture, testing
 - `metaprogramming.md` — When to use macros (last resort), how `use` works, quote/unquote, DSL patterns, hygiene, debugging, common mistakes
+- `web-api-design.md` — API design philosophy: error contracts, pagination, auth boundaries, versioning, input validation
+- `web-api-rest-vs-graphql.md` — Decision framework: when to choose REST, GraphQL, or both, with comparison table
+- `web-api-rest.md` — REST with Phoenix: thin controllers, router organization, fallback controllers, param validation, testing
+- `web-api-graphql.md` — GraphQL with Absinthe: Dataloader (required), thin resolvers, schema organization, auth middleware, complexity limits, subscriptions, testing
 
 ## Commands
 
