@@ -34,6 +34,23 @@ Implements a complete feature workflow:
 /feature Create admin dashboard with analytics
 ```
 
+## Skill Composition
+
+Load these skills upfront before starting the workflow — don't wait for individual agents to request them:
+
+**Core (always load):**
+- `elixir-production:elixir-patterns` — Pattern escalation, OTP patterns, domain architecture
+- `elixir-production:production-quality` — Quality ladder, testing strategy, precommit workflow
+
+**Conditional (load based on feature type):**
+- `elixir-production:phoenix-liveview` — If feature involves UI, LiveView, or web endpoints
+- `elixir-production:distributed-systems` — If feature involves multi-node coordination
+- `elixir-production:algorithms` — If feature involves data structures or complex computation
+- `elixir-production:performance-analyzer` — If feature has performance requirements or O(n²)+ operations
+- `elixir-production:cognitive-complexity` — If feature touches complex existing modules
+
+Loading skills upfront gives the architect and developer agents shared context from the start, reducing mid-task skill discovery and improving consistency across phases.
+
 ## Implementation
 
 ### Phase 1: Parallel Codebase Exploration
@@ -350,6 +367,17 @@ Waiting for all reviewers...
 - When reviewers disagree (e.g., one says "too complex" while another says "correct"), present both perspectives with context
 - Group findings by severity (Critical → Important → Suggestions), not by reviewer
 - Deduplicate overlapping findings across reviewers
+
+**Behavioral completeness check:**
+
+After consolidating quality findings, verify the implementation against the Phase 2 architecture spec:
+
+- Does the implementation cover all success cases specified in the architecture?
+- Does it handle all error cases the architect identified?
+- Are all public API functions implemented with the specified signatures?
+- Were any requirements from the architecture silently dropped?
+
+If gaps are found, report them as Critical findings — missing requirements are more important than code style issues.
 
 ```markdown
 ## Quality Review Findings

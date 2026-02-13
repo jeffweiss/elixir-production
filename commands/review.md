@@ -32,6 +32,23 @@ Launches the **elixir-reviewer** agent to perform thorough code review:
 /review lib/my_app/accounts/     # Review directory
 ```
 
+## Skill Composition
+
+Load these skills before launching the reviewer agent:
+
+**Always load:**
+- `elixir-production:production-quality` — Quality ladder, testing, security checklists
+- `elixir-production:elixir-patterns` — Idiomatic patterns, error handling, domain architecture
+- `elixir-production:enforcing-precommit` — Precommit gate requirements
+
+**Load based on code being reviewed:**
+- `elixir-production:phoenix-liveview` — If reviewing LiveView, controllers, or web code
+- `elixir-production:cognitive-complexity` — If reviewing complex modules (>200 lines, deep nesting)
+- `elixir-production:performance-analyzer` — If reviewing performance-sensitive code paths
+- `elixir-production:distributed-systems` — If reviewing clustering, consensus, or multi-node code
+
+Pre-loading relevant skills ensures the reviewer has full context for confidence-based assessments rather than discovering gaps mid-review.
+
 ## Implementation
 
 ### Step 1: Launch Reviewer Agent

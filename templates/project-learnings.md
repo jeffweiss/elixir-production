@@ -255,6 +255,20 @@ case user.role do
 end
 ```
 
+### Recurring Findings
+
+Track issues that appear repeatedly across reviews. When a finding reaches 3+ occurrences, it becomes a formal project convention.
+
+| Finding | Occurrences | First Seen | Status |
+|---------|-------------|------------|--------|
+| _Example: Missing timeout on Req calls_ | _4_ | _2024-01-15_ | _→ Promoted to Common Gotchas_ |
+| _Example: Typespecs missing on context functions_ | _2_ | _2024-02-01_ | _Tracking_ |
+
+**Status values:**
+- **Tracking** — Seen 2+ times, watching for pattern
+- **→ Promoted to [section]** — Reached 3+ occurrences, added as formal convention
+- **Resolved** — Root cause addressed (e.g., added to linter, fixed in template)
+
 ---
 
 ## Distributed Systems Patterns

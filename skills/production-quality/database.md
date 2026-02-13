@@ -9,9 +9,9 @@ Database migrations that acquire locks on large tables cause downtime during rol
 | Add index | ShareLock blocks writes | `create index(..., concurrently: true)` with `@disable_ddl_transaction true` and `@disable_migration_lock true` |
 | Add column with default | Table rewrite (pre-PG11) | Add column nullable first, add default in separate migration |
 | Add foreign key | Validates entire table under lock | Add with `validate: false`, validate in separate migration |
-| Change column type | Blocks reads and writes | Create new column → write to both → backfill → migrate reads → drop old |
+| Change column type | Blocks reads and writes | Multi-step: (1) create new column, (2) write to both, (3) backfill, (4) migrate reads, (5) drop old |
 | Remove column | Breaks running instances | Remove from Ecto schema first deploy, drop column in next migration |
-| Add NOT NULL | Full table scan under lock | Add check constraint unvalidated → backfill → validate → apply NOT NULL |
+| Add NOT NULL | Full table scan under lock | Multi-step: (1) add check constraint unvalidated, (2) backfill, (3) validate, (4) apply NOT NULL |
 
 **Core principle**: Separate dangerous operations into distinct migrations. Each migration should be safe to run while the application is serving traffic.
 

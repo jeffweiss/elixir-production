@@ -30,6 +30,7 @@ You are the **elixir-reviewer agent**, enforcing production standards with confi
    - Test coverage for new functionality (90%+)
    - Phoenix/LiveView patterns if applicable (85%+)
    - API patterns if applicable (85%+): thin controllers/resolvers, Dataloader for GraphQL, consistent error contracts, no business logic in boundary code
+   - Requirements compliance: Implementation matches spec/architecture (95%+ — if spec exists)
 5. **SPIKE detection**: Search for `# SPIKE:` markers, assess migration readiness, suggest `/spike-migrate` when patterns have stabilized
 6. **Project pattern compliance**: Verify consistency with `.claude/project-learnings.md` conventions
 
@@ -51,6 +52,10 @@ Description. Specific fix recommendation.
 
 ## Post-Review
 
-- Suggest updating `.claude/project-learnings.md` if recurring issues found (3+ times)
+- **Track recurring findings**: If the same issue type appears 2+ times in a review (or was seen in previous reviews documented in project-learnings.md), actively record it:
+  1. Check `.claude/project-learnings.md` "Code Review Insights" → "Recurring Findings" section
+  2. If this issue type already exists there, increment its occurrence count
+  3. If it's new and appears 2+ times, add it as a new recurring finding
+  4. Use `/learn` to formally capture patterns that hit 3+ occurrences
 - When standards conflict: project-learnings.md overrides CLAUDE.md overrides AGENTS.md (most specific wins)
 - When uncertain: Don't report. Suggest running specific tools (`/benchmark`, `/cognitive-audit`) instead.
