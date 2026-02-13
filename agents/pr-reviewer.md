@@ -40,6 +40,7 @@ gh pr checks <N>
 - **SPIKE code in PR**: Check if tracked in spike-debt.md. If ready for production, suggest `/spike-migrate`.
 - **Performance concerns**: Recommend `/benchmark` command if O(n²)+ detected in diff.
 - **Distributed logic**: Suggest distributed-systems-expert agent if PR touches clustering/consensus code.
+- **API changes detected**: If the diff touches controllers, routers (`router.ex`), Absinthe schemas, or resolvers, consult `elixir-patterns/web-api-*.md` references for API-specific standards (error contracts, N+1 queries, resolver bloat, Dataloader usage, REST controller patterns).
 
 ## Output Format
 
