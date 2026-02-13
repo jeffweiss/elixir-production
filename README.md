@@ -66,11 +66,12 @@ Beyond enforcement, the plugin provides 10 specialized agents, 8 progressive ski
 - `/distributed-review` - Analyze distributed systems design and correctness
 - `/algorithm-research` - Research cutting-edge algorithms with citations
 
-### 🔄 Three Workflow Modes
+### 🔄 Four Workflow Modes
 
 1. **Enterprise Maintenance** - Strict quality gates, comprehensive reviews, team knowledge sharing
 2. **Production Prototypes** - Balanced quality and speed, clear migration paths
 3. **Rapid Experimentation** - SPIKE mode for fast iteration, easy upgrade when ready
+4. **Supervised** - Extra human checkpoints at every phase for building trust with the agent workflow
 
 ## Installation
 
@@ -210,9 +211,10 @@ Commands (you run these)
 
 ```bash
 /feature "Add user email verification"
+/feature --supervised "Add payment processing"  # Extra checkpoints at every phase
 ```
 
-This orchestrates the full pipeline: architecture design (Opus) → your approval → TDD implementation (Sonnet) → precommit gate → parallel code review → summary with next steps. You approve the design, then the plugin handles the rest.
+This orchestrates the full pipeline: architecture design (Opus) → your approval → TDD implementation (Sonnet) → precommit gate → verification artifact → parallel code review → summary with next steps. You approve the design, then the plugin handles the rest. Use `--supervised` for extra human checkpoints at every phase transition — useful when building trust with the workflow or working in an unfamiliar codebase.
 
 **Checking code before you commit:**
 
@@ -258,11 +260,17 @@ Reviews only report issues at ≥80% confidence — no speculative noise.
 
 ### Behaviors to Know About
 
-**Precommit is a hard gate.** Three independent layers enforce it: a blocking hook on `git commit`/`git push`, a discipline skill internalized by agents, and a workflow gate in `/feature`. There is no override except SPIKE mode (`ELIXIR_SPIKE_MODE=1`).
+**Precommit is a hard gate.** Three independent layers enforce it: a blocking hook on `git commit`/`git push`, a discipline skill internalized by agents, and a workflow gate in `/feature`. There is no override except SPIKE mode (`ELIXIR_SPIKE_MODE=1`). For lightweight checks only, use safe mode (`ELIXIR_PRODUCTION_SAFE_MODE=1`) which runs compile + format but skips tests and credo.
 
 **TDD is the default.** Agents write tests before implementation. Tests are rated by business criticality (1-10) — critical paths (9-10) get tested first. Use `/spike` to skip this when experimenting.
 
-**Skills scale to the problem.** Each skill uses an escalation ladder (L0 through L5+). A quick question gets a concise reference answer. A complex architectural decision gets deep analysis with citations and tradeoff evaluation.
+**Skills pre-load for each workflow.** Commands like `/feature` and `/review` specify which skills to load upfront, so agents start with the right context instead of discovering skills mid-task. Each skill uses an escalation ladder (L0 through L5+) with reference files indexed by "when to read" — agents load only the reference file matching their current problem.
+
+**Features produce a verification artifact.** After precommit passes, the developer agent creates a structured document showing what was built (behavioral description), key design decisions, a working demo (iex session or test output), and any deviations from the architecture plan. This catches "tests pass but feature doesn't work" scenarios.
+
+**Reviews check behavioral completeness.** Beyond code quality, reviewers verify the implementation satisfies the original architecture spec — checking all success cases, error cases, and API signatures. Missing requirements are flagged as Critical findings.
+
+**The system learns from reviews.** Recurring findings are tracked in `project-learnings.md`. When the same issue type appears 3+ times, it gets promoted to a formal project convention that all agents enforce going forward.
 
 **Knowledge accumulates across sessions.** Use `/learn` to capture patterns in `.claude/project-learnings.md`. All agents read this file, keeping them consistent with your project's conventions over time.
 
@@ -384,8 +392,9 @@ spike_migration_suggestions: true
 
 ```bash
 # Validation
-export ELIXIR_VALIDATE_ON_EDIT=1  # Validate code on every edit (default: 1)
-export ELIXIR_SPIKE_MODE=1        # Skip precommit enforcement for SPIKE mode (default: 0)
+export ELIXIR_VALIDATE_ON_EDIT=1         # Validate code on every edit (default: 1)
+export ELIXIR_SPIKE_MODE=1               # Skip precommit enforcement for SPIKE mode (default: 0)
+export ELIXIR_PRODUCTION_SAFE_MODE=1     # Compile + format only, skip tests and credo (default: 0)
 ```
 
 ## Project Files
@@ -521,9 +530,26 @@ This plugin incorporates patterns from official Claude Code plugins:
    - ${CLAUDE_PLUGIN_ROOT} for all internal paths
    - Cross-installation compatibility
 
+7. **Verification artifacts** (Willison, Showboat/Rodney)
+   - Developer agents produce behavioral demos, not just test results
+   - Architecture deviation tracking catches silently dropped requirements
+
+8. **Pyramid summaries** (StrongDM Software Factory)
+   - Reference files indexed with "when to read" triggers
+   - Agents load only the file matching their current problem
+
+9. **Skill compositions** (OpenAI Skills API)
+   - Commands pre-load skill bundles upfront
+   - Reduces mid-task discovery latency
+
+10. **Gradual trust progression** (Hashimoto)
+    - Supervised mode with phase-by-phase checkpoints
+    - Default mode with single architecture gate
+    - Trust builds through repeated successful workflows
+
 ## Status & Roadmap
 
-### ✅ Fully Implemented (v2.3.0)
+### ✅ Fully Implemented (v2.4.0)
 
 All 10 agents, 8 skills, and 11 commands are complete and production-ready. Skills follow progressive disclosure: lean SKILL.md (<500 words) with deep reference files for domain knowledge. Precommit enforcement is active at three layers (hook, skill, workflow).
 
@@ -698,10 +724,13 @@ The skills in this plugin draw heavily from the work of many researchers and pra
 - Stefan Edelkamp & Armin Weiß — BlockQuicksort
 - Matteo Frigo — cache-oblivious algorithms
 
+**AI Agent Effectiveness**:
+- Simon Willison — blog posts on agent demo artifacts ([Showboat and Rodney](https://simonwillison.net/2026/Feb/10/showboat-and-rodney/)), pyramid summaries and context engineering ([Structured Context Engineering](https://simonwillison.net/2026/Feb/9/structured-context-engineering-for-file-native-agentic-systems/)), cognitive load from parallel agents ([AI Intensifies Work](https://simonwillison.net/2026/Feb/9/ai-intensifies-work/)), and quality gatekeeping for AI-generated code ([Vouch](https://simonwillison.net/2026/Feb/7/vouch/)). Coverage of Mitchell Hashimoto's [gradual trust-building approach](https://simonwillison.net/2026/Feb/5/ai-adoption-journey/) and StrongDM's [satisfaction metrics](https://simonwillison.net/2026/Feb/7/software-factory/) informed the supervised mode, verification artifacts, behavioral completeness checks, and recurring findings tracker.
+
 **Tools & Infrastructure**:
 - Claude Code team for plugin architecture
 - Anthropic for Claude and tooling
 
 ---
 
-**Version**: 2.3.0 - All 10 agents, 8 skills, and 11 commands are fully implemented and production-ready. Three-layer precommit enforcement prevents broken commits.
+**Version**: 2.4.0 - All 10 agents, 8 skills, and 11 commands are fully implemented and production-ready. Three-layer precommit enforcement prevents broken commits.
