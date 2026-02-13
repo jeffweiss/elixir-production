@@ -1,6 +1,19 @@
 {
   "description": "Elixir production quality enforcement hooks",
   "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/session-start.sh",
+            "async": false
+          }
+        ]
+      }
+    ],
+
     "PreToolUse": [
       {
         "matcher": "Write:*.ex|Write:*.exs|Edit:*.ex|Edit:*.exs",
@@ -9,6 +22,17 @@
             "type": "prompt",
             "prompt": "Before writing/editing this Elixir code, verify: 1) Are typespecs needed for public functions? 2) Is error handling explicit with tagged tuples ({:ok, value} / {:error, reason})? 3) Are tests required for new functionality? Only proceed if yes, or explicitly document why not (e.g., SPIKE mode).",
             "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Bash:git commit*|Bash:git push*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/enforce-precommit.sh",
+            "blocking": true,
+            "description": "Enforces mix precommit before any git commit or push. BLOCKING — commit will not proceed until all checks pass."
           }
         ]
       }
@@ -20,9 +44,9 @@
         "hooks": [
           {
             "type": "command",
-            "command": "./hooks/scripts/validate-precommit.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/quick-validate.sh",
             "blocking": false,
-            "description": "Validates Elixir code changes meet precommit standards. Non-blocking (warnings only)."
+            "description": "Quick validation of edited Elixir files (compile + format check). Non-blocking."
           }
         ]
       }
@@ -34,8 +58,10 @@
   },
 
   "notes": [
-    "PreToolUse prompts remind about Elixir best practices before code changes (only .ex/.exs files)",
-    "PostToolUse validation provides immediate feedback for Elixir files (non-blocking warnings)",
+    "SessionStart bootstraps non-negotiable rules (precommit, TDD) and checks environment",
+    "PreToolUse on .ex/.exs prompts about typespecs, error handling, tests",
+    "PreToolUse on git commit/push BLOCKS until mix precommit passes",
+    "PostToolUse provides fast feedback on edited files (non-blocking)",
     "Configure behavior via .claude/elixir-production.local.md per project"
   ]
 }

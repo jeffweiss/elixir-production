@@ -1,6 +1,6 @@
 ---
 name: cognitive-complexity
-description: Use when code is hard to understand, a module has too many parameters or deep nesting, abstractions feel leaky, or you need to evaluate whether code is deep-module or shallow-module design
+description: Use when code is hard to understand, a module has too many parameters or deep nesting, functions exceed 40 lines, abstractions feel leaky, or you need to evaluate deep-module vs shallow-module design per Ousterhout principles
 ---
 
 # Cognitive Complexity
@@ -53,6 +53,11 @@ Code is confusing. Why?
 - `references/metrics.md` — Cognitive complexity metrics
 - `references/patterns.md` — Refactoring patterns catalog
 - `references/onboarding.md` — Onboarding difficulty assessment
+
+## Commands
+
+- **`/cognitive-audit`** — Full complexity analysis with onboarding difficulty assessment
+- **`/review [file]`** — Review code including complexity evaluation
 
 ## Related Skills
 

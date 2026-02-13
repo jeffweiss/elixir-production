@@ -229,12 +229,13 @@ Closes #123
 - **mise**: Version management
 - **Credo**: Static analysis
 - **Styler**: Automatic code formatting
-- **ExUnit**: Testing framework
+- **ExUnit**: Testing framework (parameterized tests on 1.18+)
 - **Mox**: Behavior mocking
 - **StreamData**: Property-based testing
+- **JSON**: Built-in on Elixir 1.18+ (no Jason dependency needed)
 
 ### Optional But Recommended
-- **Dialyzer**: Type checking
+- **Dialyzer**: Cross-module type analysis (note: Elixir 1.18+ compiler handles most type checking natively)
 - **ExDoc**: Documentation generation
 - **Benchee**: Performance benchmarking
 - **Oban**: Background job processing

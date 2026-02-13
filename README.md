@@ -1,6 +1,18 @@
 # Elixir Production Plugin for Claude Code
 
-A comprehensive Claude Code plugin system for production-quality Elixir development, combining specialized agents, progressive skills, commands, and quality enforcement hooks.
+A Claude Code plugin for production-quality Elixir development. Enforces precommit quality gates, TDD workflows, and escalation-based patterns for OTP, Phoenix LiveView, and distributed systems.
+
+## What This Plugin Does
+
+When installed, this plugin **mechanically prevents broken commits**. Three independent enforcement layers ensure `mix precommit` passes before any code enters version control:
+
+1. **Hook gate** — A blocking `PreToolUse` hook intercepts `git commit` and `git push`, running the full `mix precommit` suite. The commit does not proceed until all four checks pass (compile, format, credo, test).
+2. **Discipline skill** — The `enforcing-precommit` skill provides iron laws, gate functions, and rationalization prevention that agents internalize during sessions.
+3. **Workflow gate** — The `/feature` command requires the developer agent to pass precommit before handing off to review.
+
+A `SessionStart` hook bootstraps every session with non-negotiable rules and environment checks.
+
+Beyond enforcement, the plugin provides 10 specialized agents, 8 progressive skills with escalation ladders, and 11 commands for guided Elixir development.
 
 ## Features
 
@@ -22,8 +34,9 @@ A comprehensive Claude Code plugin system for production-quality Elixir developm
 - **distributed-systems-expert** - Consensus algorithms and distributed bugs
 - **algorithms-researcher** - Cutting-edge algorithms from recent research
 
-### 📚 7 Progressive Skills
+### 📚 8 Progressive Skills
 
+- **enforcing-precommit** - Non-negotiable precommit gate with iron law and rationalization prevention
 - **elixir-patterns** - Core Elixir patterns (railway, DDD, OTP)
 - **phoenix-liveview** - LiveView streams, forms, hooks, authentication
 - **production-quality** - Quality standards and workflows
@@ -144,8 +157,9 @@ This will:
 2. **Design** architecture with complexity analysis (Opus)
 3. **Wait** for your approval
 4. **Implement** using strict TDD (Sonnet)
-5. **Review** with parallel quality analysis
-6. **Summarize** with next steps
+5. **Precommit gate** — all four checks must pass before review
+6. **Review** with parallel quality analysis
+7. **Summarize** with next steps
 
 ### 3. Review Code
 
@@ -178,43 +192,81 @@ cp ~/.claude/plugins/elixir-production/templates/project-learnings.md .claude/
 
 ## Getting the Most Out of the Plugin
 
-### How the Pieces Fit Together
+### Mental Model
 
-The plugin has three layers that work together:
+Three layers work together — you only interact with the first:
 
-- **Commands** (`/feature`, `/review`, `/precommit`) are your primary interface. Run them directly — they orchestrate everything else.
-- **Agents** are specialists that commands dispatch behind the scenes. Each has a role (architect, developer, reviewer) and a model matched to the task — Opus for deep analysis, Sonnet for implementation work.
-- **Skills** are knowledge bases loaded automatically when relevant. You don't invoke them directly — agents reference them for domain expertise on Elixir patterns, distributed systems, performance, and more.
+```
+Commands (you run these)
+  └── Agents (dispatched automatically, matched to task complexity)
+        └── Skills (loaded on demand, provide domain knowledge)
+```
 
-When you run `/feature "Add email verification"`, the feature command dispatches the **elixir-architect** agent (Opus) to design the architecture, waits for your approval, then dispatches the **elixir-developer** agent (Sonnet) to implement with TDD. Both agents pull from skills like **elixir-patterns** and **production-quality** for domain knowledge.
+**Commands** are your interface: `/feature`, `/review`, `/precommit`, etc. **Agents** are specialists that commands dispatch — Opus for design and deep analysis, Sonnet for implementation. **Skills** are reference knowledge that agents pull from automatically when they need domain expertise.
+
+### Everyday Workflows
+
+**Building a feature end-to-end:**
+
+```bash
+/feature "Add user email verification"
+```
+
+This orchestrates the full pipeline: architecture design (Opus) → your approval → TDD implementation (Sonnet) → precommit gate → parallel code review → summary with next steps. You approve the design, then the plugin handles the rest.
+
+**Checking code before you commit:**
+
+```bash
+/precommit
+```
+
+Runs compile (warnings-as-errors), format (with Styler), credo (strict), and tests. The plugin also enforces this automatically — a blocking hook prevents `git commit` and `git push` until all four checks pass.
+
+**Exploring an idea quickly:**
+
+```bash
+/spike "try GenStage for backpressure"
+```
+
+Skips production requirements (typespecs, full test coverage). Code gets marked with `# SPIKE: reason` and debt is tracked in `.claude/spike-debt.md`. When the approach pans out, `/spike-migrate` brings it to production quality with TDD.
+
+**Reviewing code:**
+
+```bash
+/review lib/my_app/accounts/     # review a directory
+/pr-review 123                   # review a GitHub PR
+/cognitive-audit                  # analyze cognitive complexity
+```
+
+Reviews only report issues at ≥80% confidence — no speculative noise.
 
 ### Picking the Right Command
 
 | What you're doing | Command |
 |---|---|
-| Building something new | `/feature` — architect designs, you approve, developer implements |
-| Checking code quality | `/review` — reviews against production standards |
-| Before committing | `/precommit` — compile, format, credo, test |
-| Exploring an idea fast | `/spike` — skip production requirements, iterate quickly |
-| SPIKE code is stable | `/spike-migrate` — upgrade to production quality with TDD |
-| Performance questions | `/benchmark` — create and run Benchee benchmarks |
-| PR ready for review | `/pr-review 123` — posts review as PR comment |
-| Distributed system concerns | `/distributed-review` — consensus, clustering, partitions |
-| Need a better algorithm | `/algorithm-research` — research with paper citations |
-| Code feels complex | `/cognitive-audit` — cognitive load analysis |
-| Learned something useful | `/learn "pattern"` — captures in project-learnings.md |
+| Building something new | `/feature` |
+| Checking code quality | `/review` |
+| Before committing | `/precommit` |
+| Exploring an idea fast | `/spike` |
+| SPIKE code is stable | `/spike-migrate` |
+| Performance questions | `/benchmark` |
+| PR ready for review | `/pr-review 123` |
+| Distributed system concerns | `/distributed-review` |
+| Need a better algorithm | `/algorithm-research` |
+| Code feels complex | `/cognitive-audit` |
+| Learned something useful | `/learn "pattern"` |
 
-### What to Expect
+### Behaviors to Know About
 
-**TDD is enforced.** Agents write tests before implementation, covering all `{:ok, ...}` and `{:error, ...}` variants. Tests are rated by business criticality (1-10) so critical paths (9-10) get tested first. Use `/spike` if you need to skip this temporarily.
+**Precommit is a hard gate.** Three independent layers enforce it: a blocking hook on `git commit`/`git push`, a discipline skill internalized by agents, and a workflow gate in `/feature`. There is no override except SPIKE mode (`ELIXIR_SPIKE_MODE=1`).
 
-**Reviews filter noise.** Only issues with ≥80% confidence are reported — Critical (90-100%) for missing typespecs and security issues, Important (80-89%) for logic bugs and pattern violations. Nothing speculative.
+**TDD is the default.** Agents write tests before implementation. Tests are rated by business criticality (1-10) — critical paths (9-10) get tested first. Use `/spike` to skip this when experimenting.
 
-**Skills scale depth to your problem.** Each skill uses an escalation ladder (L0 through L5+). A simple question gets a quick reference answer. A complex architectural problem gets deep analysis with citations and tradeoff evaluation.
+**Skills scale to the problem.** Each skill uses an escalation ladder (L0 through L5+). A quick question gets a concise reference answer. A complex architectural decision gets deep analysis with citations and tradeoff evaluation.
 
-**Project knowledge accumulates.** Use `/learn` to capture patterns in `.claude/project-learnings.md`. All agents read this file, so they stay consistent with your project's conventions over time.
+**Knowledge accumulates across sessions.** Use `/learn` to capture patterns in `.claude/project-learnings.md`. All agents read this file, keeping them consistent with your project's conventions over time.
 
-**SPIKE mode gives you an escape hatch.** `/spike` lets you prototype without typespecs, with minimal tests, marking code with `# SPIKE: reason`. Debt is tracked in `.claude/spike-debt.md`. When the approach is validated, `/spike-migrate` brings it to production quality.
+**Per-edit feedback is automatic.** A non-blocking hook runs compile and format checks after every `.ex`/`.exs` edit, catching issues early without interrupting your flow.
 
 ## Workflows
 
@@ -237,10 +289,10 @@ team_learning_enabled: true
 2. elixir-architect (Opus) designs with complexity analysis
 3. User approval required
 4. elixir-developer (Sonnet) implements with TDD
-5. `/review` before proposing changes
-6. Manual `/precommit` before commit
-7. Hooks enforce standards at every edit
-8. PR → `/pr-review` auto-comments (when implemented)
+5. Precommit gate — developer must pass all four checks before handoff
+6. `/review` before proposing changes
+7. Hooks enforce standards at every edit and block commits without precommit
+8. PR → `/pr-review` auto-comments
 9. Team reviews → project-learnings.md updated
 
 **Benefits**:
@@ -333,6 +385,7 @@ spike_migration_suggestions: true
 ```bash
 # Validation
 export ELIXIR_VALIDATE_ON_EDIT=1  # Validate code on every edit (default: 1)
+export ELIXIR_SPIKE_MODE=1        # Skip precommit enforcement for SPIKE mode (default: 0)
 ```
 
 ## Project Files
@@ -354,14 +407,29 @@ project-root/
 
 ## Precommit Workflow
 
-Every commit must pass:
+Every commit must pass all four checks:
 
 1. **Compile**: `mix compile --warnings-as-errors`
 2. **Format**: `mix format` (includes Styler)
 3. **Credo**: `mix credo --strict`
 4. **Tests**: `mix test`
 
-Hooks enforce this automatically. No broken code enters version control.
+This is enforced at three levels:
+
+- **Hook**: `enforce-precommit.sh` runs as a blocking `PreToolUse` hook on `git commit`/`git push`. Commits are blocked until all checks pass.
+- **Skill**: The `enforcing-precommit` skill is loaded by all code-producing agents, providing iron laws and rationalization prevention.
+- **Workflow**: The `/feature` command gates the developer agent on precommit before the review phase.
+
+Set up the `mix precommit` alias in your project for the simplest experience:
+
+```elixir
+# In mix.exs
+defp aliases do
+  [
+    precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "credo --strict", "test"]
+  ]
+end
+```
 
 ## Architecture
 
@@ -382,14 +450,15 @@ Hooks enforce this automatically. No broken code enters version control.
 │   ├── cognitive-scientist.md     # Cognitive load (Opus)
 │   ├── distributed-systems-expert.md  # Consensus/clustering (Opus)
 │   └── algorithms-researcher.md   # Algorithm research (Opus)
-├── skills/                        # 7 progressive skills
-│   ├── algorithms/                # SKILL.md + 4 reference files
+├── skills/                        # 8 progressive skills, 70 reference files
+│   ├── algorithms/                # SKILL.md + 14 reference files (data structures, ETS, graphs, spatial, streaming, optimization, statistics)
 │   ├── cognitive-complexity/      # SKILL.md + escalation + references/
-│   ├── distributed-systems/       # SKILL.md + 7 reference files
-│   ├── elixir-patterns/           # SKILL.md + 4 reference files
-│   ├── performance-analyzer/      # SKILL.md + 4 reference files
-│   ├── phoenix-liveview/          # SKILL.md + escalation + references/
-│   └── production-quality/        # SKILL.md + 6 reference files
+│   ├── distributed-systems/       # SKILL.md + 12 reference files (consensus, clustering, leader election, sagas, gossip, consistent hashing, event sourcing, failure modes)
+│   ├── elixir-patterns/           # SKILL.md + 8 reference files (OTP, async processing, macros, state machines)
+│   ├── enforcing-precommit/       # SKILL.md — iron law, gate function, rationalization table
+│   ├── performance-analyzer/      # SKILL.md + 5 reference files (profiling, benchmarking, latency, GC, BEAM efficiency)
+│   ├── phoenix-liveview/          # SKILL.md + 8 reference files (streams, forms, hooks, auth, advanced patterns, Plug/controllers, channels)
+│   └── production-quality/        # SKILL.md + 10 reference files (testing, property-based, security, observability, database, deployment, configuration, Ecto preloading)
 ├── commands/                      # 11 slash commands
 │   ├── precommit.md               # Quality gate
 │   ├── feature.md                 # Feature workflow
@@ -403,11 +472,14 @@ Hooks enforce this automatically. No broken code enters version control.
 │   ├── distributed-review.md      # Distributed systems
 │   └── algorithm-research.md      # Algorithm research
 ├── hooks/
-│   ├── hooks.json                 # Hook configuration
+│   ├── hooks.json                 # Hook configuration (SessionStart, PreToolUse, PostToolUse)
 │   └── scripts/
-│       ├── validate-precommit.sh
-│       ├── check-complexity.sh
-│       └── validate-dependencies.sh
+│       ├── session-start.sh       # Session bootstrap: rules, environment checks
+│       ├── enforce-precommit.sh   # BLOCKING gate: full mix precommit before commit/push
+│       ├── quick-validate.sh      # Fast per-edit feedback (compile + format, non-blocking)
+│       ├── validate-precommit.sh  # Legacy validation script
+│       ├── check-complexity.sh    # Heuristic complexity checks
+│       └── validate-dependencies.sh # Checks credo/styler in mix.exs
 └── templates/
     ├── AGENTS.md                  # For new projects
     ├── CLAUDE.md                  # For new projects
@@ -451,9 +523,9 @@ This plugin incorporates patterns from official Claude Code plugins:
 
 ## Status & Roadmap
 
-### ✅ Fully Implemented (v2.0.1)
+### ✅ Fully Implemented (v2.2.0)
 
-All 10 agents, 7 skills, and 11 commands are complete and production-ready. Skills follow progressive disclosure: lean SKILL.md (<500 words) with deep reference files for domain knowledge.
+All 10 agents, 8 skills, and 11 commands are complete and production-ready. Skills follow progressive disclosure: lean SKILL.md (<500 words) with deep reference files for domain knowledge. Precommit enforcement is active at three layers (hook, skill, workflow).
 
 ## Contributing
 
@@ -632,4 +704,4 @@ The skills in this plugin draw heavily from the work of many researchers and pra
 
 ---
 
-**Version**: 2.0.1 - All 10 agents, 7 skills, and 11 commands are fully implemented and production-ready.
+**Version**: 2.2.0 - All 10 agents, 8 skills, and 11 commands are fully implemented and production-ready. Three-layer precommit enforcement prevents broken commits.

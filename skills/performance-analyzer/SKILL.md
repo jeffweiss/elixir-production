@@ -50,6 +50,12 @@ Do you have a number for "how slow"?
 - `benchmarking.md` — Benchee templates, complexity analysis, validation workflow
 - `latency.md` — Tail latency reduction (hedged requests), fan-out amplification, measurement pitfalls, pool sizing
 - `beam-gc.md` — Per-process GC, ETS for heap reduction, 4 mitigation techniques
+- `beam-efficiency.md` — BEAM performance pitfalls: Seven Myths, binary handling (IO lists, append vs prepend), map efficiency (32-key threshold, key sharing), list O(n) traps, process data copying, atom table, NIFs
+
+## Commands
+
+- **`/benchmark`** — Create and run Benchee benchmarks for comparison
+- **`/review [file]`** — Review code including performance analysis
 
 ## Related Skills
 

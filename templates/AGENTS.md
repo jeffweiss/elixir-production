@@ -136,6 +136,10 @@ See the `phoenix-liveview` skill for comprehensive patterns. Key rules:
 - **Use `Req`**: Modern, composable HTTP client
 - **Avoid HTTPoison/Tesla**: Legacy libraries with more complexity
 
+### JSON
+- **Elixir 1.18+**: Use the built-in `JSON` module — no external dependency needed
+- **Pre-1.18**: Use `Jason` for JSON encoding/decoding
+
 ### Testing
 - **ExUnit**: Standard test framework
 - **Mox**: For mocking behaviors (define behaviors first)
@@ -149,7 +153,8 @@ See the `phoenix-liveview` skill for comprehensive patterns. Key rules:
 ### Static Analysis
 - **Credo**: Required for all projects
 - **Styler**: Automatic code style improvements (runs via formatter)
-- **Dialyzer**: Optional but recommended for large codebases
+- **Compiler type system** (Elixir 1.18+): Built-in set-theoretic types — infers types, checks calls, detects unreachable clauses. Replaces most Dialyzer use cases.
+- **Dialyzer**: Optional, for cross-module analysis the compiler doesn't yet cover
 
 ## Performance and Complexity
 

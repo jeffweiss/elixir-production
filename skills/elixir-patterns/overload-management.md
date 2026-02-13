@@ -96,6 +96,45 @@ end
 
 **Static concurrency limits guess wrong** (Keathley, "Using Regulator"): Too low wastes capacity, too high causes overload. Adaptive concurrency observes latency and error rates, then adjusts limits dynamically using Little's Law (L = λ × W). Use AIMD (Additive Increase, Multiplicative Decrease) for outbound calls. **Autoscaling does not solve overload** — it often makes it worse by increasing downstream pressure, especially on databases.
 
+## Priority Messages (OTP 28+)
+
+**Requires Erlang/OTP 28 or later.** Priority messages let urgent signals skip ahead of a backed-up message queue. The OTP team built this specifically for overload management — e.g., letting a "your queue is too long" monitor message actually reach a process whose queue is too long.
+
+### How It Works
+
+A process creates a priority alias. Other processes send to that alias with the `:priority` flag. Priority messages are inserted before all ordinary messages (but in order relative to other priority messages).
+
+```elixir
+# Receiver: create a priority alias
+prio_alias = :erlang.alias([:priority])
+
+# Share the alias with processes that need to send urgent messages
+send(monitor_pid, {:my_priority_alias, prio_alias})
+
+# Sender: send a priority message that skips the queue
+:erlang.send(prio_alias, {:overload_warning, :shed_traffic}, [:priority])
+
+# Sender: send a normal message to the same alias (goes to end of queue)
+:erlang.send(prio_alias, {:normal_event, data}, [])
+
+# Receiver: deactivate when no longer needed
+:erlang.unalias(prio_alias)
+```
+
+### Use Cases
+
+- **Overload signals**: "Start shedding load" messages to a process with 100K messages queued
+- **Health check responses**: Monitoring probes that need timely responses from busy processes
+- **Graceful shutdown**: Stop signals that shouldn't wait behind a million pending messages
+- **Priority exit signals**: `exit(prio_alias, reason, [:priority])` for urgent termination
+
+### Caveats
+
+- Only available on OTP 28+ — check with `:erlang.system_info(:otp_release)` before using
+- Priority messages still preserve ordering among themselves — they skip ordinary messages, not each other
+- No Elixir wrapper exists yet — use `:erlang.alias/1`, `:erlang.send/3`, `:erlang.unalias/1` directly
+- Not a substitute for back-pressure — if you're relying on priority messages frequently, the real fix is reducing queue buildup
+
 ## Libraries
 
 - `fuse` — Circuit breakers

@@ -53,6 +53,12 @@ end
 
 ## Authentication & Authorization
 
+**Phoenix 1.8+**: `phx.gen.auth` now generates passwordless **magic link** auth by default.
+Email/password auth is available as a fallback option. Key additions:
+- Magic link tokens with configurable expiry
+- `require_sudo_mode` plug for sensitive operations (re-authentication)
+- Simplified registration flow
+
 ```elixir
 # Scope routes by authentication
 scope "/", MyAppWeb do
@@ -60,6 +66,13 @@ scope "/", MyAppWeb do
 
   live "/dashboard", DashboardLive
   live "/settings", SettingsLive
+end
+
+# Phoenix 1.8+: require sudo mode for sensitive operations
+scope "/", MyAppWeb do
+  pipe_through [:browser, :require_authenticated_user, :require_sudo_mode]
+
+  live "/settings/security", SecuritySettingsLive
 end
 
 # Check permissions in context
@@ -98,3 +111,8 @@ provided_token == stored_token
 ```
 
 Use Argon2 or Bcrypt for passwords — they include constant-time comparison internally.
+
+**Note on Phoenix 1.8+ magic links**: Magic link auth avoids password storage entirely. Token security considerations:
+- Tokens must be single-use and time-limited (default: 10 minutes)
+- Always show "If that email exists, you will receive a link" to prevent enumeration
+- Use `Plug.Crypto.secure_compare/2` for token verification

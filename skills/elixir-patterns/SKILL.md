@@ -1,6 +1,6 @@
 ---
 name: elixir-patterns
-description: Use when structuring Elixir code, deciding whether to use processes or functions, designing supervision trees, handling overload, or needing idiomatic OTP and Phoenix context patterns
+description: Use when structuring Elixir code, deciding whether to use GenServer or plain functions, designing supervision trees, handling overload or unbounded message queues, organizing Phoenix contexts, or needing idiomatic OTP patterns
 ---
 
 # Elixir Patterns
@@ -44,9 +44,18 @@ What are you solving?
 
 - `escalation-ladder.md` — Full Pattern Escalation Ladder (Levels 0-6 with code examples and decision triggers)
 - `otp-patterns.md` — GenServer, Supervisor, Registry, Task, Protocol, SGP anti-pattern, init guarantees, BEAM nuances
+- `state-machines.md` — :gen_statem vs GenServer decision, state timeouts, postpone, state enter callbacks, why not :gen_event
 - `overload-management.md` — Back-pressure, load-shedding, circuit breaker critique, token bucket retries, adaptive concurrency
 - `domain-patterns.md` — Phoenix contexts, code quality patterns, pattern matching, tagged tuples, changesets
 - `references/contexts.md` — Full context design patterns, boundaries, anti-patterns, testing
+- `async-processing.md` — GenServer vs Oban vs Broadway decision framework, Oban worker patterns, Broadway pipeline architecture, testing
+- `metaprogramming.md` — When to use macros (last resort), how `use` works, quote/unquote, DSL patterns, hygiene, debugging, common mistakes
+
+## Commands
+
+- **`/feature <desc>`** — Guided feature implementation using these patterns
+- **`/review [file]`** — Review code against idiomatic OTP/Phoenix standards
+- **`/cognitive-audit`** — Analyze module complexity and suggest refactors
 
 ## Related Skills
 

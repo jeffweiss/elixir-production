@@ -156,6 +156,38 @@ end
 - State machine behavior (model against a simpler reference implementation)
 - Anything with "for all X, Y should hold" shape
 
+## Parameterized Tests (Elixir 1.18+)
+
+Run the same test module multiple times under different parameters — useful for testing against different adapters, configurations, or data sets.
+
+```elixir
+defmodule MyApp.CacheTest do
+  use ExUnit.Case, async: true,
+    parameterize: [
+      %{adapter: MyApp.Cache.ETS},
+      %{adapter: MyApp.Cache.Redis},
+      %{adapter: MyApp.Cache.InMemory}
+    ]
+
+  test "get returns nil for missing key", %{adapter: adapter} do
+    cache = start_supervised!({adapter, []})
+    assert adapter.get(cache, "missing") == nil
+  end
+
+  test "put and get roundtrip", %{adapter: adapter} do
+    cache = start_supervised!({adapter, []})
+    :ok = adapter.put(cache, "key", "value")
+    assert adapter.get(cache, "key") == "value"
+  end
+end
+```
+
+**When to use parameterized tests**:
+- Testing behaviour implementations across multiple adapters
+- Verifying consistent behavior across database backends
+- Testing with different configuration options
+- Any "same tests, different context" pattern
+
 ## Testing Best Practices
 
 ```elixir

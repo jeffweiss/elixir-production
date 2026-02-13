@@ -44,6 +44,32 @@ Logger.info("Database query completed",
 )
 ```
 
+## Process Labels (OTP 27+)
+
+Label dynamic processes for debugging and observability. Labels appear in Observer, crash dumps, and `Process.info/2`. Essential when running hundreds of similar workers.
+
+```elixir
+# Label a process for identification in Observer and crash dumps
+defmodule MyApp.OrderWorker do
+  use GenServer
+
+  def start_link(order_id) do
+    GenServer.start_link(__MODULE__, order_id)
+  end
+
+  def init(order_id) do
+    :proc_lib.set_label({:order_worker, order_id})
+    {:ok, %{order_id: order_id}}
+  end
+end
+
+# Read a process's label
+:proc_lib.get_label(pid)
+# => {:order_worker, "order-123"}
+```
+
+Use labels whenever you create dynamic processes — Task workers, Broadway consumers, Oban workers, or any process started via DynamicSupervisor. Without labels, crash dumps show hundreds of identical `erlang:apply/2` entries with no way to tell them apart.
+
 ## Operator Experience (OX)
 
 Design telemetry for the person who gets paged at 3am. Every metric should answer: What changed? What's the impact? Where's the bottleneck?

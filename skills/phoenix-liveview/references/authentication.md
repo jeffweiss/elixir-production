@@ -1,8 +1,12 @@
 # Authentication & Authorization Reference
 
-## Phoenix 1.7+ Authentication
+## Phoenix Authentication
 
-Phoenix 1.7+ uses `on_mount` hooks for authentication in LiveView.
+Phoenix uses `on_mount` hooks for authentication in LiveView.
+
+**Phoenix 1.8+ update**: `phx.gen.auth` now generates passwordless **magic link** authentication by default. Email/password is available as a fallback. Magic links eliminate password storage, Argon2/Bcrypt dependencies, and password reset flows. The generated code includes a `require_sudo_mode` plug for sensitive operations that require re-authentication.
+
+The `on_mount` hook patterns below work identically with both magic link and password-based auth — the session token mechanism is the same.
 
 ### Basic Setup
 

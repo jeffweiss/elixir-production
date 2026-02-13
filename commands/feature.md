@@ -22,8 +22,9 @@ Implements a complete feature workflow:
 2. **Architecture Design** - High-quality planning with complexity analysis (Opus)
 3. **User Gate** - Approval before implementation
 4. **TDD Implementation** - Test-first development (Sonnet)
-5. **Parallel Quality Review** - Multi-lens review with confidence filtering
-6. **Summary** - Consolidated findings and next steps
+5. **Precommit Gate** - Developer runs `mix precommit`, ALL checks must pass before handoff
+6. **Parallel Quality Review** - Multi-lens review with confidence filtering
+7. **Summary** - Consolidated findings and next steps
 
 ## Usage
 
@@ -271,7 +272,29 @@ Phase 1: Core Functionality
 [Developer continues through all phases]
 ```
 
-### Phase 5: Parallel Quality Review
+### Phase 5: Precommit Gate
+
+<EXTREMELY-IMPORTANT>
+The developer agent MUST run `mix precommit` and verify ALL FOUR checks pass before handing off to review.
+Do NOT proceed to Phase 6 if precommit fails. Fix all failures first.
+</EXTREMELY-IMPORTANT>
+
+After TDD implementation completes, the developer agent runs the full precommit suite:
+
+```bash
+mix precommit
+# Or if no alias: mix compile --warnings-as-errors && mix format && mix credo --strict && mix test
+```
+
+**Gate criteria:**
+- All code compiles with zero warnings
+- All files formatted (Styler applied)
+- Credo strict mode passes
+- All tests pass (including newly written tests)
+
+If any check fails, the developer fixes the issues and re-runs until all pass. Only then does the workflow proceed to review.
+
+### Phase 6: Parallel Quality Review
 
 Launch 3 reviewer agents **in parallel**:
 
@@ -315,7 +338,7 @@ Token comparison not timing-safe. Use Phoenix.Token.verify instead of string com
 - 3 minor improvements suggested
 ```
 
-### Phase 6: Summary
+### Phase 7: Summary
 
 Provide comprehensive summary:
 

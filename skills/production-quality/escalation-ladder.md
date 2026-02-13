@@ -10,15 +10,32 @@ The absolute minimum. Zero warnings, zero errors.
 |-------|---------|-----------------|
 | Compilation | `mix compile --warnings-as-errors` | Syntax errors, undefined functions, unused variables, type mismatches |
 
+As of **Elixir 1.18+**, the compiler includes a set-theoretic type system that catches significantly more at compile time:
+- Type inference from patterns and return values
+- Type checking of function calls (local, remote, built-in)
+- Detection of unreachable clauses and patterns that will never match
+- Detection of unused clauses in private functions
+
+This means Level 0 is now much more powerful than it was before 1.18. The compiler catches many type errors that previously required Dialyzer.
+
 ```elixir
 # ❌ Warning: variable "context" is unused
 def process(user, context), do: user.name
 
 # ✅ Prefix unused vars with underscore
 def process(user, _context), do: user.name
+
+# ❌ Elixir 1.18+ catches this at compile time:
+# incompatible types in pattern match — left side has type integer(), right side has type binary()
+x = "hello"
+x + 1
+
+# ❌ Elixir 1.18+ detects unreachable clauses:
+def handle(:ok), do: :success
+def handle(:ok), do: :duplicate  # warning: this clause will never match
 ```
 
-**This level means**: The code runs. Nothing more.
+**This level means**: Code compiles cleanly and passes the compiler's built-in type checks.
 
 **Move to Level 1 when**: Code compiles. Always.
 
@@ -88,6 +105,14 @@ Confidence that the code works — and keeps working when changed.
 ## Level 4: Typed
 
 Type specifications on all public functions. Catches interface misunderstandings at boundaries.
+
+**Note on Elixir 1.18+**: The compiler's built-in type system now catches many type errors at L0 (compile time). `@spec` annotations remain valuable at L4 for:
+- Documenting public API contracts for consumers
+- Enabling richer compiler inference across module boundaries
+- Catching interface mismatches the compiler can't infer from usage alone
+- Serving as machine-readable documentation
+
+Dialyzer is no longer the primary type-checking tool — the compiler handles most cases. Use Dialyzer only for cross-module analysis that the compiler doesn't yet cover.
 
 | Standard | Example |
 |----------|---------|

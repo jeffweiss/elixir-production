@@ -26,41 +26,47 @@ Single node handles the load?
 
 See `escalation-ladder.md` for full details on each level with code examples and migration triggers.
 
-## Quick Reference
+## Quick Decision
 
-| Problem | Pattern | Tool/Library |
-|---------|---------|--------------|
-| Large clusters (>50 nodes) | Partisan overlay network | partisan |
-| Strong consistency | Raft consensus | :ra, raft |
-| Eventual consistency | CRDTs | delta_crdt, lasp |
-| Leader election | Consensus or external coordinator | :ra, etcd |
-| Service discovery | DNS, Consul, K8s | libcluster |
-| Distributed state sync | PubSub | Phoenix.PubSub |
-| Presence tracking | CRDT-based tracker | Phoenix.Tracker |
-| Clock synchronization | Hybrid Logical Clocks | hlclock |
-| Ephemeral distributed KV | LWW Registers + HLC | groot |
-| Feature flags (distributed) | LWW Registers + HLC | rollout |
-| Split-brain prevention | Quorum + fencing | :ra, external coordinator |
-| Causal ordering | Vector clocks | hlclock (HLC) or manual (vector clocks) |
-| Partition testing | Cookie-based node isolation | schism |
+```
+Need exactly-one process across cluster?  → leader-election.md
+Need multi-service transactions?          → distributed-transactions.md
+Need to partition data across nodes?      → consistent-hashing.md
+Need audit trail / event replay?          → event-sourcing.md
+Need strong consistency?                  → consensus.md (Raft)
+Need eventual consistency?                → consensus.md (CRDTs)
+Need cluster membership / discovery?      → clustering.md, gossip-protocols.md
+Need to understand failure modes?         → failure-modes.md
+Preparing for production deployment?      → production-checklist.md
+```
 
 ## Common Mistakes
 
-- **Distributing too early**: Most Elixir apps never need distribution. A single BEAM node handles millions of processes. Start at Level 0.
-- **Choosing Raft when CRDTs suffice**: If eventual consistency is acceptable (shopping carts, presence, likes), CRDTs avoid all consensus complexity.
-- **Ignoring asymmetric partitions**: Most test tools simulate symmetric partitions. Real networks also produce one-way failures that violate Raft assumptions.
-- **Single Global Process**: Using a GenServer as a global cache works on one node but becomes a bottleneck and single point of failure on a cluster.
-- **Trusting CP/AP labels**: Many systems are neither strictly CP nor AP. Verify actual guarantees, don't trust vendor marketing.
+- **Distributing too early**: A single BEAM node handles millions of processes. Start at Level 0.
+- **Choosing Raft when CRDTs suffice**: If eventual consistency is acceptable, CRDTs avoid all consensus complexity.
+- **Ignoring asymmetric partitions**: Real networks produce one-way failures that violate Raft assumptions.
+- **Single Global Process**: GenServer-as-cache becomes a bottleneck and SPOF on a cluster.
+- **Trusting CP/AP labels**: Verify actual guarantees, don't trust vendor marketing.
 
 ## Reference Files
 
+- `leader-election.md` — `:global`, `:pg`, Horde, Oban cron, singleton patterns, netsplit behavior for each approach
+- `distributed-transactions.md` — Saga (choreography + orchestration), Oban workflows, compensating transactions, why not 2PC
+- `gossip-protocols.md` — SWIM failure detection, epidemic broadcast, delta-CRDTs, HyParView/Partisan
+- `consistent-hashing.md` — Ring hashing, jump consistent hash, virtual nodes, sharded ETS, Broadway partitioning
+- `event-sourcing.md` — Event sourcing, CQRS, Commanded patterns, projections, when to use vs CRUD
 - `escalation-ladder.md` — Full Distribution Escalation Ladder (Levels 0-5) with code examples
 - `consensus.md` — Raft via `:ra`, CRDTs via `delta_crdt`, Multi-Raft, Vector Clocks, Paxos
 - `clustering.md` — Distributed Erlang, Partisan, libcluster configs, PubSub, debugging patterns
-- `failure-modes.md` — Split-brain, fencing tokens, clock drift, gray failures, metastable failures, limplocks, concurrency bugs, race conditions, blast radius, redundancy conditions
-- `cap-tradeoffs.md` — CAP theorem critique, fundamental limits, consistency models, when to use which approach
+- `failure-modes.md` — Split-brain, fencing tokens, clock drift, gray failures, metastable failures, limplocks, concurrency bugs, blast radius
+- `cap-tradeoffs.md` — CAP theorem critique, fundamental limits, consistency models
 - `production-checklist.md` — 20-item deployment checklist
 - `resilience-principles.md` — Architectural principles from Hebert, Brooker, Luu, Kleppmann, Cook et al.
+
+## Commands
+
+- **`/distributed-review`** — Deep analysis of distributed architecture and failure modes
+- **`/feature <desc>`** — Guided implementation with distribution-aware design
 
 ## Related Skills
 

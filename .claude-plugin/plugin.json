@@ -1,8 +1,24 @@
 {
   "name": "elixir-production",
-  "version": "2.0.1",
-  "description": "Production-quality Elixir development system",
+  "version": "2.2.0",
+  "description": "Production-quality Elixir development with enforced precommit gates, TDD workflows, and escalation-based patterns for OTP, Phoenix LiveView, and distributed systems",
   "author": {
     "name": "Jeff Weiss"
-  }
+  },
+  "keywords": [
+    "elixir",
+    "phoenix",
+    "liveview",
+    "otp",
+    "tdd",
+    "precommit",
+    "credo",
+    "styler",
+    "production",
+    "quality",
+    "ecto",
+    "genserver",
+    "supervision",
+    "distributed"
+  ]
 }
