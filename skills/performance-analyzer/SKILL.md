@@ -46,11 +46,13 @@ Do you have a number for "how slow"?
 
 ## Reference Files
 
-- `profiling.md` — Iron Law enforcement, profiler usage, escalation ladder L0-L5, common patterns
-- `benchmarking.md` — Benchee templates, complexity analysis, validation workflow
-- `latency.md` — Tail latency reduction (hedged requests), fan-out amplification, measurement pitfalls, pool sizing
-- `beam-gc.md` — Per-process GC, ETS for heap reduction, 4 mitigation techniques
-- `beam-efficiency.md` — BEAM performance pitfalls: Seven Myths, binary handling (IO lists, append vs prepend), map efficiency (32-key threshold, key sharing), list O(n) traps, process data copying, atom table, NIFs
+**Read the file that matches your current problem:**
+
+- `profiling.md` — **When**: About to profile code or choosing a profiler. Iron Law enforcement, profiler usage, escalation ladder L0-L5, common patterns
+- `benchmarking.md` — **When**: Comparing implementation alternatives with Benchee. Benchee templates, complexity analysis, validation workflow
+- `latency.md` — **When**: Investigating tail latency or fan-out amplification. Tail latency reduction (hedged requests), fan-out amplification, measurement pitfalls, pool sizing
+- `beam-gc.md` — **When**: Suspecting garbage collection pressure or large heaps. Per-process GC, ETS for heap reduction, 4 mitigation techniques
+- `beam-efficiency.md` — **When**: Hitting BEAM-specific performance pitfalls (binaries, maps, lists). BEAM performance pitfalls: Seven Myths, binary handling (IO lists, append vs prepend), map efficiency (32-key threshold, key sharing), list O(n) traps, process data copying, atom table, NIFs
 
 ## Commands
 

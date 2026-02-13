@@ -50,18 +50,20 @@ Preparing for production deployment?      → production-checklist.md
 
 ## Reference Files
 
-- `leader-election.md` — `:global`, `:pg`, Horde, Oban cron, singleton patterns, netsplit behavior for each approach
-- `distributed-transactions.md` — Saga (choreography + orchestration), Oban workflows, compensating transactions, why not 2PC
-- `gossip-protocols.md` — SWIM failure detection, epidemic broadcast, delta-CRDTs, HyParView/Partisan
-- `consistent-hashing.md` — Ring hashing, jump consistent hash, virtual nodes, sharded ETS, Broadway partitioning
-- `event-sourcing.md` — Event sourcing, CQRS, Commanded patterns, projections, when to use vs CRUD
-- `escalation-ladder.md` — Full Distribution Escalation Ladder (Levels 0-5) with code examples
-- `consensus.md` — Raft via `:ra`, CRDTs via `delta_crdt`, Multi-Raft, Vector Clocks, Paxos
-- `clustering.md` — Distributed Erlang, Partisan, libcluster configs, PubSub, debugging patterns
-- `failure-modes.md` — Split-brain, fencing tokens, clock drift, gray failures, metastable failures, limplocks, concurrency bugs, blast radius
-- `cap-tradeoffs.md` — CAP theorem critique, fundamental limits, consistency models
-- `production-checklist.md` — 20-item deployment checklist
-- `resilience-principles.md` — Architectural principles from Hebert, Brooker, Luu, Kleppmann, Cook et al.
+**Read the file that matches your current problem:**
+
+- `leader-election.md` — **When**: Need exactly-one process across cluster. `:global`, `:pg`, Horde, Oban cron, singleton patterns, netsplit behavior for each approach
+- `distributed-transactions.md` — **When**: Multiple services must coordinate atomically. Saga (choreography + orchestration), Oban workflows, compensating transactions, why not 2PC
+- `gossip-protocols.md` — **When**: Need efficient cluster-wide information spread. SWIM failure detection, epidemic broadcast, delta-CRDTs, HyParView/Partisan
+- `consistent-hashing.md` — **When**: Partitioning data or load across nodes. Ring hashing, jump consistent hash, virtual nodes, sharded ETS, Broadway partitioning
+- `event-sourcing.md` — **When**: Need audit trail or event replay. Event sourcing, CQRS, Commanded patterns, projections, when to use vs CRUD
+- `escalation-ladder.md` — **When**: Deciding whether/how to distribute. Full Distribution Escalation Ladder (Levels 0-5) with code examples
+- `consensus.md` — **When**: Need strong or eventual consistency guarantees. Raft via `:ra`, CRDTs via `delta_crdt`, Multi-Raft, Vector Clocks, Paxos
+- `clustering.md` — **When**: Setting up node discovery and communication. Distributed Erlang, Partisan, libcluster configs, PubSub, debugging patterns
+- `failure-modes.md` — **When**: Debugging distributed bugs or designing for resilience. Split-brain, fencing tokens, clock drift, gray failures, metastable failures, limplocks, concurrency bugs, blast radius
+- `cap-tradeoffs.md` — **When**: Evaluating consistency vs availability tradeoffs. CAP theorem critique, fundamental limits, consistency models
+- `production-checklist.md` — **When**: Preparing distributed system for deployment. 20-item deployment checklist
+- `resilience-principles.md` — **When**: Designing fault-tolerant architecture. Architectural principles from Hebert, Brooker, Luu, Kleppmann, Cook et al.
 
 ## Commands
 

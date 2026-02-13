@@ -42,18 +42,20 @@ What are you solving?
 
 ## Reference Files
 
-- `escalation-ladder.md` — Full Pattern Escalation Ladder (Levels 0-6 with code examples and decision triggers)
-- `otp-patterns.md` — GenServer, Supervisor, Registry, Task, Protocol, SGP anti-pattern, init guarantees, BEAM nuances
-- `state-machines.md` — :gen_statem vs GenServer decision, state timeouts, postpone, state enter callbacks, why not :gen_event
-- `overload-management.md` — Back-pressure, load-shedding, circuit breaker critique, token bucket retries, adaptive concurrency
-- `domain-patterns.md` — Phoenix contexts, code quality patterns, pattern matching, tagged tuples, changesets
-- `references/contexts.md` — Full context design patterns, boundaries, anti-patterns, testing
-- `async-processing.md` — GenServer vs Oban vs Broadway decision framework, Oban worker patterns, Broadway pipeline architecture, testing
-- `metaprogramming.md` — When to use macros (last resort), how `use` works, quote/unquote, DSL patterns, hygiene, debugging, common mistakes
-- `web-api-design.md` — API design philosophy: error contracts, pagination, auth boundaries, versioning, input validation
-- `web-api-rest-vs-graphql.md` — Decision framework: when to choose REST, GraphQL, or both, with comparison table
-- `web-api-rest.md` — REST with Phoenix: thin controllers, router organization, fallback controllers, param validation, testing
-- `web-api-graphql.md` — GraphQL with Absinthe: Dataloader (required), thin resolvers, schema organization, auth middleware, complexity limits, subscriptions, testing
+**Read the file that matches your current problem:**
+
+- `escalation-ladder.md` — **When**: Deciding which pattern level to use. Full Pattern Escalation Ladder (Levels 0-6 with code examples and decision triggers)
+- `otp-patterns.md` — **When**: Building GenServers, supervisors, or registries. GenServer, Supervisor, Registry, Task, Protocol, SGP anti-pattern, init guarantees, BEAM nuances
+- `state-machines.md` — **When**: Modeling workflows with defined states. :gen_statem vs GenServer decision, state timeouts, postpone, state enter callbacks, why not :gen_event
+- `overload-management.md` — **When**: System is slow or queues are growing. Back-pressure, load-shedding, circuit breaker critique, token bucket retries, adaptive concurrency
+- `domain-patterns.md` — **When**: Organizing business logic code. Phoenix contexts, code quality patterns, pattern matching, tagged tuples, changesets
+- `references/contexts.md` — **When**: Designing module boundaries. Full context design patterns, boundaries, anti-patterns, testing
+- `async-processing.md` — **When**: Choosing between GenServer, Oban, and Broadway. GenServer vs Oban vs Broadway decision framework, Oban worker patterns, Broadway pipeline architecture, testing
+- `metaprogramming.md` — **When**: Considering macros (last resort). When to use macros (last resort), how `use` works, quote/unquote, DSL patterns, hygiene, debugging, common mistakes
+- `web-api-design.md` — **When**: Building any external API. API design philosophy: error contracts, pagination, auth boundaries, versioning, input validation
+- `web-api-rest-vs-graphql.md` — **When**: Choosing between REST and GraphQL. Decision framework: when to choose REST, GraphQL, or both, with comparison table
+- `web-api-rest.md` — **When**: Building REST endpoints. REST with Phoenix: thin controllers, router organization, fallback controllers, param validation, testing
+- `web-api-graphql.md` — **When**: Building GraphQL with Absinthe. GraphQL with Absinthe: Dataloader (required), thin resolvers, schema organization, auth middleware, complexity limits, subscriptions, testing
 
 ## Commands
 

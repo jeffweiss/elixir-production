@@ -32,14 +32,16 @@ Start with server-rendered HTML. Escalate through streams, assign_async, PubSub,
 
 ## Reference Files
 
-- `escalation-ladder.md` — Full L0-L5 with code examples, auth scopes, testing
-- `references/streams.md` — Stream patterns and pagination
-- `references/forms.md` — Form patterns including uploads and nested forms
-- `references/hooks.md` — JavaScript hooks with third-party library integration
-- `references/authentication.md` — Authorization, session management, magic link auth
-- `references/advanced-patterns.md` — assign_async, attach_hook widgets, reconnect state management
-- `references/plug-and-controllers.md` — Plug pipelines, JSON APIs, fallback controllers, rate limiting
-- `references/channels.md` — Phoenix Channels, WebSockets, Presence, when Channels vs LiveView
+**Read the file that matches your current problem:**
+
+- `escalation-ladder.md` — **When**: Deciding which LiveView pattern level to use. Full L0-L5 with code examples, auth scopes, testing
+- `references/streams.md` — **When**: Rendering dynamic lists or paginating data. Stream patterns and pagination
+- `references/forms.md` — **When**: Building forms, uploads, or nested inputs. Form patterns including uploads and nested forms
+- `references/hooks.md` — **When**: Integrating JavaScript libraries or browser APIs. JavaScript hooks with third-party library integration
+- `references/authentication.md` — **When**: Implementing auth, sessions, or authorization. Authorization, session management, magic link auth
+- `references/advanced-patterns.md` — **When**: Using assign_async, attach_hook, or managing reconnection. assign_async, attach_hook widgets, reconnect state management
+- `references/plug-and-controllers.md` — **When**: Building JSON APIs or Plug pipelines (non-LiveView). Plug pipelines, JSON APIs, fallback controllers, rate limiting
+- `references/channels.md` — **When**: Need WebSockets, Presence, or real-time outside LiveView. Phoenix Channels, WebSockets, Presence, when Channels vs LiveView
 
 ## Commands
 

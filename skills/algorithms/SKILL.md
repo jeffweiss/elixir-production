@@ -39,20 +39,22 @@ What are you solving?
 
 ## Reference Files
 
-- `ets-and-persistent-term.md` — ETS table types, concurrency options, cache/rate-limiter patterns, `:persistent_term` for config
-- `otp-builtins.md` — `:queue`, `:gb_trees`, `:gb_sets`, `:atomics`, `:counters`, `:array`, Okasaki structures
-- `graph-algorithms.md` — `:digraph`/`:digraph_utils` patterns: topological sort, shortest path, cycle detection, dependency resolution
-- `string-and-text.md` — Fuzzy matching (Levenshtein, Jaro-Winkler), full-text search (tsvector, pg_trgm), autocomplete
-- `concurrent-data-structures.md` — CAS with `:atomics`, lock-free patterns, ETS concurrency, `:counters` write_concurrency
-- `spatial.md` — PostGIS (ST_DWithin, ST_Contains), geohashing, Haversine distance
-- `interval-and-range.md` — Postgres range types, overlap detection, exclusion constraints, scheduling
-- `streaming-algorithms.md` — Sliding windows, EMA, reservoir sampling, streaming percentiles
-- `optimization.md` — Dynamic programming, greedy, constraint satisfaction, gradient descent (Nx), simulated annealing, linear programming, when to push to Postgres
-- `statistics.md` — Descriptive stats (Postgres and Elixir), anomaly detection (Z-score, IQR), A/B testing, Explorer DataFrames, histograms, correlation
-- `compression.md` — `:zlib`, Zstd, LZ4, `:erlang.term_to_binary` compressed option
-- `probabilistic.md` — HyperLogLog, Cuckoo filters, Count-Min Sketch, Bloom filters
-- `hash-functions.md` — xxHash3, BLAKE3, HighwayHash selection guide
-- `sorting-and-search.md` — Cache-efficient sorting, BlockQuicksort, pdqsort, B+ trees
+**Read the file that matches your current problem:**
+
+- `ets-and-persistent-term.md` — **When**: Need concurrent shared state or config cache. ETS table types, concurrency options, cache/rate-limiter patterns, `:persistent_term` for config
+- `otp-builtins.md` — **When**: Looking for queue, tree, set, or counter primitives. `:queue`, `:gb_trees`, `:gb_sets`, `:atomics`, `:counters`, `:array`, Okasaki structures
+- `graph-algorithms.md` — **When**: Working with dependencies, networks, or paths. `:digraph`/`:digraph_utils` patterns: topological sort, shortest path, cycle detection, dependency resolution
+- `string-and-text.md` — **When**: Building search, fuzzy matching, or autocomplete. Fuzzy matching (Levenshtein, Jaro-Winkler), full-text search (tsvector, pg_trgm), autocomplete
+- `concurrent-data-structures.md` — **When**: Need lock-free or high-concurrency patterns. CAS with `:atomics`, lock-free patterns, ETS concurrency, `:counters` write_concurrency
+- `spatial.md` — **When**: Working with geographic data or proximity queries. PostGIS (ST_DWithin, ST_Contains), geohashing, Haversine distance
+- `interval-and-range.md` — **When**: Handling time ranges, scheduling, or overlap detection. Postgres range types, overlap detection, exclusion constraints, scheduling
+- `streaming-algorithms.md` — **When**: Computing metrics over unbounded data streams. Sliding windows, EMA, reservoir sampling, streaming percentiles
+- `optimization.md` — **When**: Solving constraint, scheduling, or resource allocation problems. Dynamic programming, greedy, constraint satisfaction, gradient descent (Nx), simulated annealing, linear programming, when to push to Postgres
+- `statistics.md` — **When**: Need analytics, anomaly detection, or A/B testing. Descriptive stats (Postgres and Elixir), anomaly detection (Z-score, IQR), A/B testing, Explorer DataFrames, histograms, correlation
+- `compression.md` — **When**: Need to compress data for storage or transfer. `:zlib`, Zstd, LZ4, `:erlang.term_to_binary` compressed option
+- `probabilistic.md` — **When**: Counting or membership testing at massive scale. HyperLogLog, Cuckoo filters, Count-Min Sketch, Bloom filters
+- `hash-functions.md` — **When**: Choosing hash function for non-crypto use. xxHash3, BLAKE3, HighwayHash selection guide
+- `sorting-and-search.md` — **When**: Sorting large datasets or building indexes. Cache-efficient sorting, BlockQuicksort, pdqsort, B+ trees
 
 ## Commands
 

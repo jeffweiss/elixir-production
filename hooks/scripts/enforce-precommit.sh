@@ -36,7 +36,9 @@ echo "1/4 Compiling with --warnings-as-errors..."
 if mix compile --warnings-as-errors 2>&1; then
   echo "✅ Compilation passed"
 else
-  echo "❌ Compilation failed — fix warnings/errors before committing" >&2
+  echo "❌ Compilation failed" >&2
+  echo "   Re-run:  mix compile --warnings-as-errors" >&2
+  echo "   Common:  Unused variables (prefix with _), missing imports, deprecated functions" >&2
   FAILED=1
 fi
 echo ""
@@ -46,7 +48,9 @@ echo "2/4 Checking formatting..."
 if mix format --check-formatted 2>&1; then
   echo "✅ Formatting correct"
 else
-  echo "❌ Files need formatting — run: mix format" >&2
+  echo "❌ Formatting check failed" >&2
+  echo "   Fix:     mix format" >&2
+  echo "   Re-run:  mix format --check-formatted" >&2
   FAILED=1
 fi
 echo ""
@@ -57,7 +61,9 @@ if mix help credo &>/dev/null; then
   if mix credo --strict 2>&1; then
     echo "✅ Credo passed"
   else
-    echo "❌ Credo found issues — fix before committing" >&2
+    echo "❌ Credo strict check failed" >&2
+    echo "   Re-run:  mix credo --strict" >&2
+    echo "   Common:  Long functions (extract), TODO comments, naming conventions, unused params" >&2
     FAILED=1
   fi
 else
@@ -70,14 +76,20 @@ echo "4/4 Running tests..."
 if mix test 2>&1; then
   echo "✅ All tests passed"
 else
-  echo "❌ Tests failed — fix before committing" >&2
+  echo "❌ Tests failed" >&2
+  echo "   Re-run:  mix test" >&2
+  echo "   Focused: mix test path/to/failing_test.exs:LINE_NUMBER" >&2
+  echo "   Common:  Assertion mismatches, missing setup, changed function signatures" >&2
   FAILED=1
 fi
 echo ""
 
 if [[ "$FAILED" -eq 1 ]]; then
   echo "🚫 COMMIT BLOCKED: precommit checks failed." >&2
-  echo "Fix all issues above, then try committing again." >&2
+  echo "" >&2
+  echo "Fix all issues above, then re-run: mix precommit" >&2
+  echo "Or run all checks manually:" >&2
+  echo "  mix compile --warnings-as-errors && mix format && mix credo --strict && mix test" >&2
   exit 1
 fi
 

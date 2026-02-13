@@ -38,16 +38,18 @@ precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "c
 
 ## Reference Files
 
-- `escalation-ladder.md` — Full Production Readiness Ladder (L0-L7 with code examples, gate criteria)
-- `testing.md` — Testing strategy, TDD, error handling imperative, documentation standards
-- `property-based-testing.md` — StreamData generators, custom generators, property patterns (roundtrip, idempotency, oracle, metamorphic), shrinking, Ecto integration
-- `security.md` — SQL injection, XSS, CSRF, input validation, secrets management, timing attacks, magic link auth
-- `observability.md` — Telemetry layers, span conventions, tracing-as-analytics, alerting, gray failures, degraded mode, process labels
-- `database.md` — Safe Ecto migrations, isolation level warnings, dependency SLAs, performance guidelines
-- `ecto-preloading.md` — N+1 detection and prevention, preload strategies (join, subquery, inline), LiveView preloading
-- `error-handling.md` — Crash early patterns, strict-then-loosen, complexity analysis
-- `deployment.md` — Mix releases, health checks (liveness/readiness), graceful shutdown, Docker, Fly.io/K8s patterns
-- `configuration.md` — config.exs vs runtime.exs, compile_env vs get_env, runtime secrets, config providers
+**Read the file that matches your current problem:**
+
+- `escalation-ladder.md` — **When**: Need details on any production readiness level (L0-L7). Full Production Readiness Ladder (L0-L7 with code examples, gate criteria)
+- `testing.md` — **When**: Designing test strategy or setting up TDD workflow. Testing strategy, TDD, error handling imperative, documentation standards
+- `property-based-testing.md` — **When**: Testing with StreamData generators or properties. StreamData generators, custom generators, property patterns (roundtrip, idempotency, oracle, metamorphic), shrinking, Ecto integration
+- `security.md` — **When**: Hardening against injection, XSS, CSRF, or managing secrets. SQL injection, XSS, CSRF, input validation, secrets management, timing attacks, magic link auth
+- `observability.md` — **When**: Adding telemetry, tracing, or alerting. Telemetry layers, span conventions, tracing-as-analytics, alerting, gray failures, degraded mode, process labels
+- `database.md` — **When**: Writing migrations or tuning Ecto queries. Safe Ecto migrations, isolation level warnings, dependency SLAs, performance guidelines
+- `ecto-preloading.md` — **When**: Fixing N+1 queries or choosing preload strategy. N+1 detection and prevention, preload strategies (join, subquery, inline), LiveView preloading
+- `error-handling.md` — **When**: Designing error flows or debugging crash patterns. Crash early patterns, strict-then-loosen, complexity analysis
+- `deployment.md` — **When**: Building releases, health checks, or Docker configs. Mix releases, health checks (liveness/readiness), graceful shutdown, Docker, Fly.io/K8s patterns
+- `configuration.md` — **When**: Choosing between compile-time and runtime config. config.exs vs runtime.exs, compile_env vs get_env, runtime secrets, config providers
 
 ## Commands
 

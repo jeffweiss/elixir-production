@@ -60,6 +60,12 @@ Waiting for all agents to complete...
 
 **After all complete**, consolidate findings:
 
+**Consolidation rules:**
+- Merge overlapping findings into a single coherent picture
+- When agents disagree or find conflicting patterns, call out the conflict explicitly
+- Prioritize findings by relevance to the feature being built
+- Don't concatenate raw agent outputs — synthesize into one narrative
+
 ```markdown
 ## Exploration Results
 
@@ -294,6 +300,35 @@ mix precommit
 
 If any check fails, the developer fixes the issues and re-runs until all pass. Only then does the workflow proceed to review.
 
+### Phase 5.5: Verification Artifact
+
+After precommit passes, the developer agent produces a **verification document** demonstrating the feature works — not just that tests pass.
+
+**Developer produces:**
+
+```markdown
+## Verification: [Feature Name]
+
+### What Was Built
+[Behavioral description: what the feature does for users, not a file list]
+
+### Key Design Decisions
+- [Decision 1]: [Why this approach over alternatives]
+- [Decision 2]: [Why this approach over alternatives]
+
+### Working Demo
+[iex session, curl output, or test output showing the feature in action]
+
+### Architecture Deviations
+- [None / List any divergences from Phase 2 plan with rationale]
+```
+
+This artifact:
+- Gives reviewers behavioral context, not just code to read
+- Catches "tests pass but feature doesn't work" scenarios
+- Documents decisions that would otherwise be lost
+- Creates an audit trail for the human supervisor
+
 ### Phase 6: Parallel Quality Review
 
 Launch 3 reviewer agents **in parallel**:
@@ -309,6 +344,12 @@ Waiting for all reviewers...
 ```
 
 **Consolidate findings** from all reviewers:
+
+**Consolidation rules:**
+- Produce a single unified report, not three separate reviewer outputs
+- When reviewers disagree (e.g., one says "too complex" while another says "correct"), present both perspectives with context
+- Group findings by severity (Critical → Important → Suggestions), not by reviewer
+- Deduplicate overlapping findings across reviewers
 
 ```markdown
 ## Quality Review Findings

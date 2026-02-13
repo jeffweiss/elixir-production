@@ -48,11 +48,13 @@ Code is confusing. Why?
 
 ## Reference Files
 
-- `escalation-ladder.md` — Full Complexity Reduction Ladder (L0-L5 with code examples, thresholds)
-- `ousterhout-principles.md` — Deep modules, information hiding, strategic programming, SRK interface design
-- `references/metrics.md` — Cognitive complexity metrics
-- `references/patterns.md` — Refactoring patterns catalog
-- `references/onboarding.md` — Onboarding difficulty assessment
+**Read the file that matches your current problem:**
+
+- `escalation-ladder.md` — **When**: Need thresholds and code examples for each complexity level. Full Complexity Reduction Ladder (L0-L5 with code examples, thresholds)
+- `ousterhout-principles.md` — **When**: Evaluating module depth or interface design. Deep modules, information hiding, strategic programming, SRK interface design
+- `references/metrics.md` — **When**: Measuring cognitive complexity numerically. Cognitive complexity metrics
+- `references/patterns.md` — **When**: Looking for specific refactoring techniques. Refactoring patterns catalog
+- `references/onboarding.md` — **When**: Assessing how hard code is for new developers. Onboarding difficulty assessment
 
 ## Commands
 
