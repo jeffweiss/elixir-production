@@ -1,6 +1,6 @@
 {
   "name": "elixir-production",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Production-quality Elixir development with enforced precommit gates, TDD workflows, and escalation-based patterns for OTP, Phoenix LiveView, and distributed systems",
   "author": {
     "name": "Jeff Weiss"

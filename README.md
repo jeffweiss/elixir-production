@@ -454,7 +454,7 @@ end
 │   ├── algorithms/                # SKILL.md + 14 reference files (data structures, ETS, graphs, spatial, streaming, optimization, statistics)
 │   ├── cognitive-complexity/      # SKILL.md + escalation + references/
 │   ├── distributed-systems/       # SKILL.md + 12 reference files (consensus, clustering, leader election, sagas, gossip, consistent hashing, event sourcing, failure modes)
-│   ├── elixir-patterns/           # SKILL.md + 8 reference files (OTP, async processing, macros, state machines)
+│   ├── elixir-patterns/           # SKILL.md + 12 reference files (OTP, async processing, macros, state machines, web API design, REST, GraphQL, overload management)
 │   ├── enforcing-precommit/       # SKILL.md — iron law, gate function, rationalization table
 │   ├── performance-analyzer/      # SKILL.md + 5 reference files (profiling, benchmarking, latency, GC, BEAM efficiency)
 │   ├── phoenix-liveview/          # SKILL.md + 8 reference files (streams, forms, hooks, auth, advanced patterns, Plug/controllers, channels)
@@ -523,7 +523,7 @@ This plugin incorporates patterns from official Claude Code plugins:
 
 ## Status & Roadmap
 
-### ✅ Fully Implemented (v2.2.0)
+### ✅ Fully Implemented (v2.3.0)
 
 All 10 agents, 8 skills, and 11 commands are complete and production-ready. Skills follow progressive disclosure: lean SKILL.md (<500 words) with deep reference files for domain knowledge. Precommit enforcement is active at three layers (hook, skill, workflow).
 
@@ -704,4 +704,4 @@ The skills in this plugin draw heavily from the work of many researchers and pra
 
 ---
 
-**Version**: 2.2.0 - All 10 agents, 8 skills, and 11 commands are fully implemented and production-ready. Three-layer precommit enforcement prevents broken commits.
+**Version**: 2.3.0 - All 10 agents, 8 skills, and 11 commands are fully implemented and production-ready. Three-layer precommit enforcement prevents broken commits.
