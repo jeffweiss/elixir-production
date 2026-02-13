@@ -11,6 +11,10 @@
 #   0 - Validation passed
 #   1 - Compilation failed (warning reported)
 #   2 - Not applicable (not an Elixir file or not a mix project)
+#
+# Environment variables:
+#   ELIXIR_VALIDATE_ON_EDIT=0     - Disable per-edit validation
+#   ELIXIR_PRODUCTION_SAFE_MODE   - No effect (this script is already read-only)
 
 set -euo pipefail
 
@@ -35,6 +39,10 @@ VALIDATE_ON_EDIT="${ELIXIR_VALIDATE_ON_EDIT:-1}"
 if [[ "$VALIDATE_ON_EDIT" != "1" ]]; then
   exit 0
 fi
+
+# Safe mode: quick-validate is already non-blocking and read-only, so no
+# additional restrictions needed. Document for consistency with enforce-precommit.sh.
+# ELIXIR_PRODUCTION_SAFE_MODE has no effect here — this script never runs tests.
 
 # Quick compile check (not --force, just incremental)
 if ! mix compile --warnings-as-errors 2>/dev/null; then

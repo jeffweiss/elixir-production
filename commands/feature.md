@@ -32,6 +32,7 @@ Implements a complete feature workflow:
 /feature Add user email verification
 /feature Implement product search with filters
 /feature Create admin dashboard with analytics
+/feature --supervised Add payment processing    # Extra checkpoints
 ```
 
 ## Skill Composition
@@ -485,6 +486,26 @@ Based on `.claude/elixir-production.local.md`:
 - Skip architecture phase
 - Fast implementation
 - Mark as SPIKE code
+
+**Supervised mode** (`--supervised`):
+
+For building trust with the agent workflow, or working in unfamiliar codebases. Adds human checkpoints at each phase transition:
+
+- **Phase 1 → 2**: Show exploration summary, ask "Proceed to architecture design?"
+- **Phase 2 → 3**: (Same as default — architecture approval gate)
+- **Phase 4 (during)**: Before each file write, show the planned change and ask for approval. After each file, show what was written and ask "Continue?"
+- **Phase 5 → 5.5**: Show precommit results, ask "Proceed to verification?"
+- **Phase 5.5 → 6**: Show verification artifact, ask "Proceed to review?"
+- **Phase 6 → 7**: Show review findings, ask "Accept findings?"
+
+As trust builds, users can drop `--supervised` to use the standard workflow which only gates at Phase 3 (architecture approval).
+
+```
+Trust progression:
+  --supervised     → Checkpoint at every phase transition
+  (default)        → Checkpoint at Phase 3 only (architecture approval)
+  (enterprise)     → Checkpoint at Phase 3 + strict review requirements
+```
 
 ## Error Handling
 

@@ -12,6 +12,10 @@
 #   0 - All precommit checks passed, commit may proceed
 #   1 - Precommit checks failed, commit blocked
 #   2 - Not applicable (not a mix project, or SPIKE mode)
+#
+# Environment variables:
+#   ELIXIR_SPIKE_MODE=1        - Skip all precommit checks
+#   ELIXIR_PRODUCTION_SAFE_MODE=1 - Run compile + format only (no tests, no credo)
 
 set -euo pipefail
 
@@ -23,6 +27,46 @@ fi
 # Check for SPIKE mode override
 if [[ "${ELIXIR_SPIKE_MODE:-0}" == "1" ]]; then
   echo "⚠️  SPIKE mode: precommit enforcement skipped. Debt tracked in .claude/spike-debt.md" >&2
+  exit 0
+fi
+
+# Safe mode: restrict to compile + format only (no test execution, no credo side effects)
+SAFE_MODE="${ELIXIR_PRODUCTION_SAFE_MODE:-0}"
+if [[ "$SAFE_MODE" == "1" ]]; then
+  echo "🛡️  Safe mode: running compile + format checks only (tests and credo skipped)"
+  echo ""
+
+  FAILED=0
+
+  echo "1/2 Compiling with --warnings-as-errors..."
+  if mix compile --warnings-as-errors 2>&1; then
+    echo "✅ Compilation passed"
+  else
+    echo "❌ Compilation failed" >&2
+    echo "   Re-run:  mix compile --warnings-as-errors" >&2
+    FAILED=1
+  fi
+  echo ""
+
+  echo "2/2 Checking formatting..."
+  if mix format --check-formatted 2>&1; then
+    echo "✅ Formatting correct"
+  else
+    echo "❌ Formatting check failed" >&2
+    echo "   Fix:     mix format" >&2
+    FAILED=1
+  fi
+  echo ""
+
+  if [[ "$FAILED" -eq 1 ]]; then
+    echo "🚫 COMMIT BLOCKED: safe mode checks failed." >&2
+    echo "" >&2
+    echo "Fix issues above, then re-run. For full checks: unset ELIXIR_PRODUCTION_SAFE_MODE" >&2
+    exit 1
+  fi
+
+  echo "✅ Safe mode checks passed — commit may proceed."
+  echo "   Note: Tests and credo were skipped. Run full suite before release: mix precommit"
   exit 0
 fi
 
