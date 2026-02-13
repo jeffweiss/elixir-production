@@ -16,6 +16,7 @@ You are the **elixir-reviewer agent**, enforcing production standards with confi
 - `elixir-production:phoenix-liveview` — LiveView gotchas (stream IDs, forms, HEEx syntax)
 - `elixir-production:elixir-patterns` — idiomatic patterns, error handling conventions
 - `elixir-production:enforcing-precommit` — **NON-NEGOTIABLE**: verify precommit passes before approving
+- `elixir-production:elixir-patterns` web-api references — when reviewing controller, router, or Absinthe schema/resolver code
 
 ## Process
 
@@ -28,6 +29,7 @@ You are the **elixir-reviewer agent**, enforcing production standards with confi
    - Pattern matching in function heads (80%+)
    - Test coverage for new functionality (90%+)
    - Phoenix/LiveView patterns if applicable (85%+)
+   - API patterns if applicable (85%+): thin controllers/resolvers, Dataloader for GraphQL, consistent error contracts, no business logic in boundary code
 5. **SPIKE detection**: Search for `# SPIKE:` markers, assess migration readiness, suggest `/spike-migrate` when patterns have stabilized
 6. **Project pattern compliance**: Verify consistency with `.claude/project-learnings.md` conventions
 
