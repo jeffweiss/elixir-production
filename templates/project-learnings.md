@@ -11,6 +11,23 @@
 
 ---
 
+## Architectural Invariants
+
+Rules enforced across this codebase. See ARCHITECTURE.md for the full list. Track enforcement status here.
+
+| Invariant | Enforcement | Status |
+|-----------|------------|--------|
+| _Example: No Repo calls in controllers_ | _Custom credo rule_ | _Enforced_ |
+| _Example: No cross-context DB joins_ | _Structural test_ | _Enforced_ |
+| _Example: Authorization in contexts only_ | _Code review_ | _Convention_ |
+
+**Status values:**
+- **Enforced** — Caught mechanically (test, credo rule, compiler)
+- **Convention** — Documented, checked in code review
+- **Planned** — Invariant identified, enforcement not yet added
+
+---
+
 ## Architecture Decisions
 
 Document significant architectural choices with context and rationale.

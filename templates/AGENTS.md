@@ -1,5 +1,10 @@
 # Elixir Production Development Standards
 
+## Architecture
+
+See `ARCHITECTURE.md` for the system codemap, layer diagram, and architectural invariants.
+Read it first when making changes that cross module boundaries or add new contexts.
+
 ## Version Management
 - Use `mise` for managing Erlang/Elixir versions
 - Keep versions specified in `.tool-versions`

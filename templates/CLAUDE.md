@@ -80,6 +80,7 @@ All code changes require review focusing on:
 - Use ubiquitous language from business domain
 - Define clear bounded contexts
 - Maintain context boundaries (no cross-context queries)
+- See `ARCHITECTURE.md` for codemap, layer diagram, and enforced invariants
 
 ## Documentation Philosophy
 

@@ -12,7 +12,7 @@ When installed, this plugin **mechanically prevents broken commits**. Three inde
 
 A `SessionStart` hook bootstraps every session with non-negotiable rules and environment checks.
 
-Beyond enforcement, the plugin provides 10 specialized agents, 8 progressive skills with escalation ladders, and 11 commands for guided Elixir development.
+Beyond enforcement, the plugin provides 10 specialized agents, 8 progressive skills with escalation ladders, 11 commands for guided Elixir development, and an ARCHITECTURE.md template for documenting and mechanically enforcing architectural invariants.
 
 ## Features
 
@@ -185,6 +185,7 @@ Copy templates to your project for enhanced standards:
 # Project-specific configuration
 cp ~/.claude/plugins/elixir-production/templates/AGENTS.md ./
 cp ~/.claude/plugins/elixir-production/templates/CLAUDE.md ./
+cp ~/.claude/plugins/elixir-production/templates/ARCHITECTURE.md ./
 
 # Create .claude directory for project knowledge
 mkdir -p .claude
@@ -195,15 +196,38 @@ cp ~/.claude/plugins/elixir-production/templates/project-learnings.md .claude/
 
 ### Mental Model
 
-Three layers work together — you only interact with the first:
+Four layers work together:
 
 ```
+Project Docs (you maintain these — they're the map agents navigate by)
+  ├── ARCHITECTURE.md          — codemap, invariants, layer diagram
+  ├── AGENTS.md / CLAUDE.md    — coding standards, conventions
+  └── .claude/project-learnings.md — patterns discovered over time
+
 Commands (you run these)
   └── Agents (dispatched automatically, matched to task complexity)
         └── Skills (loaded on demand, provide domain knowledge)
 ```
 
-**Commands** are your interface: `/feature`, `/review`, `/precommit`, etc. **Agents** are specialists that commands dispatch — Opus for design and deep analysis, Sonnet for implementation. **Skills** are reference knowledge that agents pull from automatically when they need domain expertise.
+**Project docs** are the foundation — agents read them before every task. The more accurate your ARCHITECTURE.md and project-learnings.md, the better agents understand your codebase. **Commands** are your interface: `/feature`, `/review`, `/precommit`, etc. **Agents** are specialists — Opus for design and deep analysis, Sonnet for implementation. **Skills** are reference knowledge that agents pull from automatically.
+
+The key insight: agents work best when the repository itself is the source of truth. Push conventions, invariants, and architecture into project docs — not into one-off prompts.
+
+### Setting Up a New Project
+
+Copy the templates and fill in your project's specifics:
+
+```bash
+cp ~/.claude/plugins/elixir-production/templates/ARCHITECTURE.md ./
+cp ~/.claude/plugins/elixir-production/templates/AGENTS.md ./
+cp ~/.claude/plugins/elixir-production/templates/CLAUDE.md ./
+mkdir -p .claude
+cp ~/.claude/plugins/elixir-production/templates/project-learnings.md .claude/
+```
+
+Start with **ARCHITECTURE.md** — fill in the codemap (your actual `lib/` structure) and 3-5 invariants your codebase enforces. Keep it under 80 lines. This single file gives every agent a map of your system.
+
+AGENTS.md and CLAUDE.md can start minimal and grow as project conventions emerge. project-learnings.md grows automatically as agents discover patterns.
 
 ### Everyday Workflows
 
@@ -214,7 +238,7 @@ Commands (you run these)
 /feature --supervised "Add payment processing"  # Extra checkpoints at every phase
 ```
 
-This orchestrates the full pipeline: architecture design (Opus) → your approval → TDD implementation (Sonnet) → precommit gate → verification artifact → parallel code review → summary with next steps. You approve the design, then the plugin handles the rest. Use `--supervised` for extra human checkpoints at every phase transition — useful when building trust with the workflow or working in an unfamiliar codebase.
+This orchestrates the full pipeline: architecture design (Opus) → your approval → TDD implementation (Sonnet) → precommit gate → verification artifact → parallel code review → summary with next steps. The architect reads ARCHITECTURE.md to respect existing boundaries and proposes structural tests for any new invariants. Use `--supervised` for extra human checkpoints at every phase transition.
 
 **Checking code before you commit:**
 
@@ -240,7 +264,18 @@ Skips production requirements (typespecs, full test coverage). Code gets marked 
 /cognitive-audit                  # analyze cognitive complexity
 ```
 
-Reviews only report issues at ≥80% confidence — no speculative noise.
+Reviews only report issues at ≥80% confidence — no speculative noise. If ARCHITECTURE.md exists, the reviewer also checks for invariant violations.
+
+### Strengthening Invariants Over Time
+
+Architectural invariants progress through three enforcement levels:
+
+```
+Convention  →  Structural Test  →  Custom Credo Rule
+(documented)   (fails in mix test)  (fails on every edit)
+```
+
+Start by documenting invariants in ARCHITECTURE.md (e.g., "controllers don't call Repo"). When one gets violated in a review, add a structural test — see `boundary-enforcement.md` in the elixir-patterns skill for ready-made examples. For invariants you want caught on every `mix credo` run, promote to a custom credo rule. Track enforcement status in project-learnings.md.
 
 ### Picking the Right Command
 
@@ -273,6 +308,8 @@ Reviews only report issues at ≥80% confidence — no speculative noise.
 **The system learns from reviews.** Recurring findings are tracked in `project-learnings.md`. When the same issue type appears 3+ times, it gets promoted to a formal project convention that all agents enforce going forward.
 
 **Knowledge accumulates across sessions.** Use `/learn` to capture patterns in `.claude/project-learnings.md`. All agents read this file, keeping them consistent with your project's conventions over time.
+
+**ARCHITECTURE.md prevents architectural drift.** A brief (~60-line) stable document records your project's codemap, layer diagram, and architectural invariants. The architect agent reads it before designing features, the reviewer checks changes against stated invariants, and invariants are tracked from "Convention" through "Enforced" (by structural tests or custom credo rules) in project-learnings.md.
 
 **Per-edit feedback is automatic.** A non-blocking hook runs compile and format checks after every `.ex`/`.exs` edit, catching issues early without interrupting your flow.
 
@@ -408,6 +445,7 @@ project-root/
 │   ├── spike-debt.md                # Tracked SPIKE technical debt
 │   ├── elixir-production.local.md   # Project-specific plugin config
 │   └── settings.local.json          # Permissions
+├── ARCHITECTURE.md (optional)       # Codemap, invariants, layer diagram
 ├── AGENTS.md (optional)             # Project-specific technical standards
 ├── CLAUDE.md (optional)             # Project-specific high-level principles
 ├── .formatter.exs                   # Must include Styler plugin
@@ -463,7 +501,7 @@ end
 │   ├── algorithms/                # SKILL.md + 14 reference files (data structures, ETS, graphs, spatial, streaming, optimization, statistics)
 │   ├── cognitive-complexity/      # SKILL.md + escalation + references/
 │   ├── distributed-systems/       # SKILL.md + 12 reference files (consensus, clustering, leader election, sagas, gossip, consistent hashing, event sourcing, failure modes)
-│   ├── elixir-patterns/           # SKILL.md + 12 reference files (OTP, async processing, macros, state machines, web API design, REST, GraphQL, overload management)
+│   ├── elixir-patterns/           # SKILL.md + 13 reference files (OTP, async processing, macros, state machines, web API design, REST, GraphQL, overload management, boundary enforcement)
 │   ├── enforcing-precommit/       # SKILL.md — iron law, gate function, rationalization table
 │   ├── performance-analyzer/      # SKILL.md + 5 reference files (profiling, benchmarking, latency, GC, BEAM efficiency)
 │   ├── phoenix-liveview/          # SKILL.md + 8 reference files (streams, forms, hooks, auth, advanced patterns, Plug/controllers, channels)
@@ -490,6 +528,7 @@ end
 │       ├── check-complexity.sh    # Heuristic complexity checks
 │       └── validate-dependencies.sh # Checks credo/styler in mix.exs
 └── templates/
+    ├── ARCHITECTURE.md            # Codemap, invariants, layers (matklad-style)
     ├── AGENTS.md                  # For new projects
     ├── CLAUDE.md                  # For new projects
     ├── .formatter.exs             # Formatter config
@@ -547,11 +586,17 @@ This plugin incorporates patterns from official Claude Code plugins:
     - Default mode with single architecture gate
     - Trust builds through repeated successful workflows
 
+11. **Architectural invariants as code** (matklad, OpenAI Harness Engineering)
+    - Brief ARCHITECTURE.md template: codemap, layer diagram, enforced invariants
+    - Mechanical enforcement via structural tests and custom credo rules
+    - Invariants expressed as absences (things deliberately kept separate)
+    - Agent-readable error messages with remediation steps
+
 ## Status & Roadmap
 
-### ✅ Fully Implemented (v2.4.0)
+### ✅ Fully Implemented (v2.5.0)
 
-All 10 agents, 8 skills, and 11 commands are complete and production-ready. Skills follow progressive disclosure: lean SKILL.md (<500 words) with deep reference files for domain knowledge. Precommit enforcement is active at three layers (hook, skill, workflow).
+All 10 agents, 8 skills, and 11 commands are complete and production-ready. Skills follow progressive disclosure: lean SKILL.md (<500 words) with deep reference files for domain knowledge. Precommit enforcement is active at three layers (hook, skill, workflow). Architectural invariants are documented, tracked, and mechanically enforced.
 
 ## Contributing
 
@@ -726,6 +771,8 @@ The skills in this plugin draw heavily from the work of many researchers and pra
 
 **AI Agent Effectiveness**:
 - Simon Willison — blog posts on agent demo artifacts ([Showboat and Rodney](https://simonwillison.net/2026/Feb/10/showboat-and-rodney/)), pyramid summaries and context engineering ([Structured Context Engineering](https://simonwillison.net/2026/Feb/9/structured-context-engineering-for-file-native-agentic-systems/)), cognitive load from parallel agents ([AI Intensifies Work](https://simonwillison.net/2026/Feb/9/ai-intensifies-work/)), and quality gatekeeping for AI-generated code ([Vouch](https://simonwillison.net/2026/Feb/7/vouch/)). Coverage of Mitchell Hashimoto's [gradual trust-building approach](https://simonwillison.net/2026/Feb/5/ai-adoption-journey/) and StrongDM's [satisfaction metrics](https://simonwillison.net/2026/Feb/7/software-factory/) informed the supervised mode, verification artifacts, behavioral completeness checks, and recurring findings tracker.
+- matklad (Aleksey Kladov) — [ARCHITECTURE.md](https://matklad.github.io/2021/02/06/ARCHITECTURE.md.html) concept: brief stable architecture documents with codemap, invariants (especially absences), and cross-cutting concerns. Informed the ARCHITECTURE.md template and boundary enforcement approach.
+- OpenAI Harness Engineering team — "Give Codex a map, not a 1,000-page instruction manual", mechanical enforcement of invariants via custom linters and structural tests, agent-readable error messages with remediation. Informed boundary enforcement patterns and architectural invariant tracking.
 
 **Tools & Infrastructure**:
 - Claude Code team for plugin architecture
@@ -733,4 +780,4 @@ The skills in this plugin draw heavily from the work of many researchers and pra
 
 ---
 
-**Version**: 2.4.0 - All 10 agents, 8 skills, and 11 commands are fully implemented and production-ready. Three-layer precommit enforcement prevents broken commits.
+**Version**: 2.5.0 - All 10 agents, 8 skills, and 11 commands are fully implemented and production-ready. Three-layer precommit enforcement prevents broken commits. Architectural invariants enforced mechanically.

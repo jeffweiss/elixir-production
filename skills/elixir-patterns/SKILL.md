@@ -56,6 +56,7 @@ What are you solving?
 - `web-api-rest-vs-graphql.md` — **When**: Choosing between REST and GraphQL. Decision framework: when to choose REST, GraphQL, or both, with comparison table
 - `web-api-rest.md` — **When**: Building REST endpoints. REST with Phoenix: thin controllers, router organization, fallback controllers, param validation, testing
 - `web-api-graphql.md` — **When**: Building GraphQL with Absinthe. GraphQL with Absinthe: Dataloader (required), thin resolvers, schema organization, auth middleware, complexity limits, subscriptions, testing
+- `boundary-enforcement.md` — **When**: Enforcing architectural invariants mechanically. Structural tests for context boundaries, custom credo rules, cross-context join detection, agent-readable error messages
 
 ## Commands
 

@@ -121,11 +121,12 @@ Providing context:
 - Project patterns: Oban for background jobs, Mox for testing
 
 Agent will:
-1. Analyze existing patterns
+1. Analyze existing patterns and ARCHITECTURE.md invariants
 2. Design architecture with complexity analysis
-3. Create comprehensive TDD test suite
-4. Provide phased implementation plan
-5. Auto-create benchmarks if O(n²)+ detected
+3. Identify architectural invariants (new or existing to respect)
+4. Create comprehensive TDD test suite (including structural boundary tests)
+5. Provide phased implementation plan
+6. Auto-create benchmarks if O(n²)+ detected
 
 Waiting for architect...
 ```
