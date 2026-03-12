@@ -1,6 +1,6 @@
 ---
 name: performance-analyzer
-description: Use when code is reported slow, before suggesting any optimization, when choosing between cprof/eprof/fprof/tprof, or when creating Benchee benchmarks to compare approaches
+description: This skill should be used when code is reported slow, before suggesting any optimization, when choosing between "cprof/eprof/fprof/tprof", or when creating "Benchee benchmarks" to compare approaches
 ---
 
 # Performance Analysis for Elixir/Phoenix

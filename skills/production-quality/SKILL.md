@@ -1,6 +1,6 @@
 ---
 name: production-quality
-description: Use when preparing code for production, running mix precommit, mix compile warnings-as-errors, mix credo --strict, mix format, mix test failures, adding typespecs, evaluating security posture, checking migration safety, or reviewing code before committing
+description: This skill should be used when preparing code for production, running "mix precommit", "mix compile --warnings-as-errors", "mix credo --strict", "mix format", "mix test", adding typespecs, evaluating security posture, checking migration safety, or reviewing code before committing
 ---
 
 # Production Quality

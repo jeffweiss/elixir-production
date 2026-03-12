@@ -1,6 +1,6 @@
 ---
 name: cognitive-complexity
-description: Use when code is hard to understand, a module has too many parameters or deep nesting, functions exceed 40 lines, abstractions feel leaky, or you need to evaluate deep-module vs shallow-module design per Ousterhout principles
+description: This skill should be used when code is hard to understand, a module has "too many parameters or deep nesting", "functions exceed 40 lines", "abstractions feel leaky", or evaluating "deep-module vs shallow-module" design per Ousterhout principles
 ---
 
 # Cognitive Complexity

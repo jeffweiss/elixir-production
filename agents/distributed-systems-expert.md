@@ -1,8 +1,54 @@
 ---
 name: distributed-systems-expert
-description: Use when designing a distributed architecture, investigating a distributed bug (split-brain, state disagreement, partition recovery), or evaluating consensus algorithm tradeoffs for a specific system
+description: Use when designing a distributed architecture, investigating a distributed bug (split-brain, state disagreement, partition recovery, data loss), evaluating consensus algorithm tradeoffs, or working with message brokers (Kafka, RabbitMQ), PubSub systems, event streaming, or message delivery guarantees (at-least-once, exactly-once)
+
+  <example>
+  Context: User is designing a multi-node system.
+  user: "We need to add leader election for our job scheduler across 3 nodes"
+  assistant: "I'll use the distributed-systems-expert agent to evaluate leader election strategies and recommend an approach."
+  <commentary>
+  Distributed consensus decision requires specialist with CAP tradeoff expertise.
+  </commentary>
+  </example>
+
+  <example>
+  Context: User is debugging a distributed system issue.
+  user: "We're seeing state disagreements between nodes after a network partition"
+  assistant: "I'll use the distributed-systems-expert agent to investigate the split-brain scenario."
+  <commentary>
+  Distributed bug investigation needs deep expertise in partition recovery.
+  </commentary>
+  </example>
+
+  <example>
+  Context: User is concerned about data loss in a messaging pipeline.
+  user: "We're losing messages between our Kafka consumer and the processing pipeline"
+  assistant: "I'll use the distributed-systems-expert agent to analyze message delivery guarantees and identify where data loss is occurring."
+  <commentary>
+  Data loss in message brokers requires understanding of delivery semantics, offset management, and failure modes.
+  </commentary>
+  </example>
+
+  <example>
+  Context: User is designing a PubSub or event streaming system.
+  user: "Should we use Phoenix.PubSub, Broadway with Kafka, or Oban for distributing events across nodes?"
+  assistant: "I'll use the distributed-systems-expert agent to evaluate the tradeoffs for your event distribution needs."
+  <commentary>
+  PubSub/event streaming architecture choices involve delivery guarantees, ordering, and backpressure — distributed systems concerns.
+  </commentary>
+  </example>
 model: opus
 color: blue
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - TodoWrite
+  - WebSearch
+  - WebFetch
+skills:
+  - elixir-production:distributed-systems
 ---
 
 # Distributed Systems Expert Agent

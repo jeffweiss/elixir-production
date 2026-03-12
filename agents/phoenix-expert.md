@@ -1,8 +1,36 @@
 ---
 name: phoenix-expert
 description: Use when building or debugging Phoenix LiveView features that need guided implementation, not just pattern lookup
+
+  <example>
+  Context: User is building a LiveView feature.
+  user: "I need to add a live search with debounce to the users page"
+  assistant: "I'll use the phoenix-expert agent for guided LiveView implementation with proper stream patterns."
+  <commentary>
+  LiveView implementation guidance beyond simple pattern lookup.
+  </commentary>
+  </example>
+
+  <example>
+  Context: User is debugging a LiveView issue.
+  user: "My LiveView form keeps resetting on every keystroke"
+  assistant: "I'll use the phoenix-expert agent to debug this — likely a form/changeset lifecycle issue."
+  <commentary>
+  LiveView gotcha debugging requires specialist knowledge.
+  </commentary>
+  </example>
 model: sonnet
 color: magenta
+tools:
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Grep
+  - Glob
+skills:
+  - elixir-production:phoenix-liveview
+  - elixir-production:elixir-patterns
 ---
 
 # Phoenix Expert Agent

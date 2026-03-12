@@ -1,8 +1,34 @@
 ---
 name: cognitive-scientist
 description: Use when actively analyzing a specific module or codebase for cognitive load, onboarding difficulty, or refactoring opportunities
+
+  <example>
+  Context: User notices code is hard to understand or maintain.
+  user: "This module has gotten really complex, can you analyze the cognitive load?"
+  assistant: "I'll use the cognitive-scientist agent to perform an Ousterhout-based complexity analysis."
+  <commentary>
+  Explicit cognitive complexity concern maps to this specialist agent.
+  </commentary>
+  </example>
+
+  <example>
+  Context: Onboarding a new developer to a codebase area.
+  user: "How hard would it be for a new developer to understand the billing context?"
+  assistant: "I'll use the cognitive-scientist agent to assess onboarding difficulty and produce a guide."
+  <commentary>
+  Onboarding difficulty assessment is a core cognitive-scientist capability.
+  </commentary>
+  </example>
 model: opus
 color: magenta
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - TodoWrite
+skills:
+  - elixir-production:cognitive-complexity
 ---
 
 # Cognitive Scientist Agent

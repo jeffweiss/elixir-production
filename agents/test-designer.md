@@ -1,8 +1,34 @@
 ---
 name: test-designer
 description: Use when designing a test strategy for a feature, analyzing behavioral coverage gaps, or specifying which test cases to write with criticality ratings
+
+  <example>
+  Context: A new feature needs comprehensive test coverage.
+  user: "Design the test strategy for the payment processing module"
+  assistant: "I'll use the test-designer agent to design tests with criticality ratings covering all success/error/edge paths."
+  <commentary>
+  Test strategy design with criticality prioritization is the test-designer's specialty.
+  </commentary>
+  </example>
+
+  <example>
+  Context: User suspects test coverage gaps.
+  user: "Are there any behavioral coverage gaps in our auth tests?"
+  assistant: "I'll use the test-designer agent to analyze the test space and identify missing coverage."
+  <commentary>
+  Coverage gap analysis requires systematic behavioral enumeration.
+  </commentary>
+  </example>
 model: sonnet
 color: cyan
+tools:
+  - Read
+  - Write
+  - Grep
+  - Glob
+  - Bash
+skills:
+  - elixir-production:production-quality
 ---
 
 # Test Designer Agent

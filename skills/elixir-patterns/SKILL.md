@@ -1,6 +1,6 @@
 ---
 name: elixir-patterns
-description: Use when structuring Elixir code, deciding whether to use GenServer or plain functions, designing supervision trees, handling overload or unbounded message queues, organizing Phoenix contexts, or needing idiomatic OTP patterns
+description: This skill should be used when structuring Elixir code, deciding whether to use "GenServer or plain functions", "designing supervision trees", "handling overload or unbounded message queues", "organizing Phoenix contexts", or needing idiomatic OTP patterns
 ---
 
 # Elixir Patterns

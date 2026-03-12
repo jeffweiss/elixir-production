@@ -1,6 +1,6 @@
 ---
 name: phoenix-liveview
-description: Use when working with Phoenix LiveView, Plug pipelines, controllers, JSON APIs, channels, streams, forms, phx-hook, authentication, or debugging Phoenix/LiveView gotchas
+description: This skill should be used when working with "Phoenix LiveView", "Plug pipelines", "controllers", "JSON APIs", "channels", "streams", "forms", "phx-hook", "authentication", or debugging "Phoenix/LiveView gotchas"
 ---
 
 # Phoenix Patterns

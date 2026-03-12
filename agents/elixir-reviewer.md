@@ -1,8 +1,36 @@
 ---
 name: elixir-reviewer
 description: Use when code changes need review against production standards, before committing, or when checking if implementation is production-ready
+
+  <example>
+  Context: A major project step has been completed and needs review.
+  user: "I've finished implementing the user authentication system"
+  assistant: "I'll use the elixir-reviewer agent to review the implementation against production standards."
+  <commentary>
+  Completed implementation needs production standards review before commit.
+  </commentary>
+  </example>
+
+  <example>
+  Context: User wants a code quality check.
+  user: "Can you review this module before I commit?"
+  assistant: "I'll use the elixir-reviewer agent to check against production standards."
+  <commentary>
+  Explicit review request with pre-commit context.
+  </commentary>
+  </example>
 model: sonnet
 color: yellow
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+skills:
+  - elixir-production:production-quality
+  - elixir-production:phoenix-liveview
+  - elixir-production:elixir-patterns
+  - elixir-production:enforcing-precommit
 ---
 
 # Elixir Reviewer Agent

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mix precommit:*)",
+      "Bash(mix compile:*)",
+      "Bash(mix format:*)",
+      "Bash(mix credo:*)",
+      "Bash(mix test:*)",
+      "Bash(mix deps.get:*)",
+      "Bash(mix hex.info:*)",
+      "Read",
+      "Grep",
+      "Glob"
+    ]
+  }
+}

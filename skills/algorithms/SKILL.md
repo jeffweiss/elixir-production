@@ -1,6 +1,6 @@
 ---
 name: algorithms
-description: Use when choosing data structures, Map vs ETS vs gb_trees performance, evaluating hash functions, needing HyperLogLog or bloom/cuckoo filters, or comparing OTP built-ins against specialized alternatives for Elixir
+description: This skill should be used when choosing "data structures", "Map vs ETS vs gb_trees performance", evaluating "hash functions", needing "HyperLogLog or bloom/cuckoo filters", or comparing OTP built-ins against specialized alternatives for Elixir
 ---
 
 # Modern Algorithms and Data Structures

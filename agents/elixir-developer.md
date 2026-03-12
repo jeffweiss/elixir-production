@@ -1,8 +1,38 @@
 ---
 name: elixir-developer
 description: Use when implementing Elixir code after a plan exists, or when writing new functions, modules, or features that need tests written first
+
+  <example>
+  Context: An architecture plan exists and implementation is ready to begin.
+  user: "The architecture looks good, go ahead and implement it"
+  assistant: "I'll use the elixir-developer agent to implement this with TDD — tests first, then implementation."
+  <commentary>
+  Post-architecture implementation with TDD is the developer agent's primary role.
+  </commentary>
+  </example>
+
+  <example>
+  Context: User wants to add a specific function or module.
+  user: "Add a GenServer that manages rate limiting with a token bucket"
+  assistant: "I'll use the elixir-developer agent to implement this with tests first."
+  <commentary>
+  Concrete implementation task that needs TDD workflow.
+  </commentary>
+  </example>
 model: sonnet
 color: green
+tools:
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Grep
+  - Glob
+  - TodoWrite
+skills:
+  - elixir-production:elixir-patterns
+  - elixir-production:production-quality
+  - elixir-production:enforcing-precommit
 ---
 
 # Elixir Developer Agent

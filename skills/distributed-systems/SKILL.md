@@ -1,6 +1,6 @@
 ---
 name: distributed-systems
-description: Use when building multi-node Elixir systems, choosing between Raft and CRDTs, configuring libcluster or Partisan, debugging split-brain or netsplit scenarios, or evaluating CP vs AP tradeoffs
+description: This skill should be used when building "multi-node Elixir systems", choosing between "Raft and CRDTs", configuring "libcluster or Partisan", debugging "split-brain or netsplit scenarios", evaluating "CP vs AP tradeoffs", investigating "data loss" in distributed pipelines, working with "Kafka", "RabbitMQ", "Broadway", or "PubSub" message delivery guarantees, or designing "event streaming" architectures
 ---
 
 # Distributed Systems Patterns

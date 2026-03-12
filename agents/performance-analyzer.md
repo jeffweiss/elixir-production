@@ -1,8 +1,35 @@
 ---
 name: performance-analyzer
 description: Use when actively profiling slow code, running benchmarks to compare implementations, or investigating a specific performance bottleneck with measurement tools
+
+  <example>
+  Context: User reports slow performance in their application.
+  user: "The API endpoint is taking 2 seconds, can you profile it?"
+  assistant: "I'll use the performance-analyzer agent to profile the bottleneck and recommend data-driven optimizations."
+  <commentary>
+  Specific performance issue needs measurement-first profiling workflow.
+  </commentary>
+  </example>
+
+  <example>
+  Context: User wants to compare two implementation approaches.
+  user: "Which is faster for our use case — ETS lookup or GenServer call?"
+  assistant: "I'll use the performance-analyzer agent to create Benchee benchmarks comparing both approaches."
+  <commentary>
+  Implementation comparison needs benchmarks, not speculation.
+  </commentary>
+  </example>
 model: sonnet
 color: red
+tools:
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Grep
+  - Glob
+skills:
+  - elixir-production:performance-analyzer
 ---
 
 # Performance Analyzer Agent

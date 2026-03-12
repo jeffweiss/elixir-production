@@ -1,8 +1,35 @@
 ---
 name: pr-reviewer
 description: Use when reviewing a GitHub pull request by number, or when validating a PR is ready to merge
+
+  <example>
+  Context: User wants a PR reviewed.
+  user: "Review PR #42"
+  assistant: "I'll use the pr-reviewer agent to perform a comprehensive review of PR #42."
+  <commentary>
+  PR review by number is the primary trigger for this agent.
+  </commentary>
+  </example>
+
+  <example>
+  Context: User wants to validate before merging.
+  user: "Is PR #15 ready to merge?"
+  assistant: "I'll use the pr-reviewer agent to validate the PR against production standards."
+  <commentary>
+  Merge readiness validation maps to the PR reviewer.
+  </commentary>
+  </example>
 model: sonnet
 color: yellow
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - Agent
+skills:
+  - elixir-production:production-quality
+  - elixir-production:enforcing-precommit
 ---
 
 # PR Reviewer Agent

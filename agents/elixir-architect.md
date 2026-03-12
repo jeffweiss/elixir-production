@@ -1,8 +1,48 @@
 ---
 name: elixir-architect
 description: Use when a feature needs architectural design before implementation, including complexity analysis, test specification, and phased implementation strategy
+
+  <example>
+  Context: User wants to add a new feature to an Elixir project.
+  user: "I need to add real-time notifications to our Phoenix app"
+  assistant: "I'll use the elixir-architect agent to design the notification system architecture before implementation."
+  <commentary>
+  Feature requires architectural decisions about PubSub, persistence, delivery guarantees — architect designs before developer implements.
+  </commentary>
+  </example>
+
+  <example>
+  Context: User describes a complex feature that spans multiple contexts.
+  user: "We need a billing system with Stripe integration, usage tracking, and invoice generation"
+  assistant: "This spans multiple Phoenix contexts. I'll use the elixir-architect agent to design the module structure and data flow."
+  <commentary>
+  Multi-context feature needs upfront architecture planning with clear boundaries.
+  </commentary>
+  </example>
+
+  <example>
+  Context: User wants to understand the design implications before coding.
+  user: "Before we build this, can you design the architecture?"
+  assistant: "I'll use the elixir-architect agent to produce a comprehensive architecture document."
+  <commentary>
+  Explicit architecture request maps directly to the architect agent.
+  </commentary>
+  </example>
 model: opus
 color: blue
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - Agent
+  - TodoWrite
+  - WebSearch
+  - WebFetch
+skills:
+  - elixir-production:elixir-patterns
+  - elixir-production:production-quality
+  - elixir-production:performance-analyzer
 ---
 
 # Elixir Architect Agent

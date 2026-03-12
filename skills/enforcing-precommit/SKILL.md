@@ -1,6 +1,6 @@
 ---
 name: enforcing-precommit
-description: Use when about to run git commit, git push, or claim implementation is complete in an Elixir project — requires running mix precommit and confirming output before any commit or completion claim
+description: This skill should be used when about to run "git commit", "git push", or claim implementation is complete in an Elixir project — requires running mix precommit and confirming output before any commit or completion claim
 ---
 
 # Enforcing Precommit
