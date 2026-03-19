@@ -12,27 +12,34 @@ When installed, this plugin **mechanically prevents broken commits**. Three inde
 
 A `SessionStart` hook bootstraps every session with non-negotiable rules and environment checks.
 
-Beyond enforcement, the plugin provides 10 specialized agents, 8 progressive skills with escalation ladders, 11 commands for guided Elixir development, and an ARCHITECTURE.md template for documenting and mechanically enforcing architectural invariants.
+Beyond enforcement, the plugin provides 11 personality-driven agents, 8 progressive skills with escalation ladders, 11 commands for guided Elixir development, and an ARCHITECTURE.md template for documenting and mechanically enforcing architectural invariants.
 
 ## Features
 
-### 🤖 10 Specialized Agents
+### 🤖 11 Personality-Driven Agents
 
-**Core Agents**:
-- **elixir-architect** (Opus) - Feature design with complexity analysis and comprehensive TDD test suite design
-- **elixir-developer** (Sonnet) - Primary TDD-focused implementation worker
-- **elixir-reviewer** (Sonnet) - Code review with confidence-based reporting (≥80%)
-- **test-designer** (Sonnet) - Comprehensive test strategy with criticality ratings (1-10 scale)
+Agents are modeled after real humans whose published philosophies drive behavioral differences — not just tone.
 
-**Phoenix & Performance Specialists**:
-- **phoenix-expert** (Sonnet) - LiveView/Phoenix specialist with deep patterns
-- **performance-analyzer** (Sonnet) - Profiling and Benchee benchmarks
-- **pr-reviewer** (Sonnet) - GitHub PR automation with cognitive integration
+**Design & Architecture**:
+- **Dijkstra** (Opus) — Formal correctness, invariant analysis, structured decomposition
+- **Lamport** (Opus) — Distributed systems, consensus, formal verification
 
-**Expert Consultants** (Opus):
-- **cognitive-scientist** - Cognitive load analysis (Ousterhout philosophy)
-- **distributed-systems-expert** - Consensus algorithms and distributed bugs
-- **algorithms-researcher** - Cutting-edge algorithms from recent research
+**Implementation**:
+- **Valim** (Sonnet) — Idiomatic Elixir, OTP patterns, pragmatic design
+- **McCord** (Sonnet) — Phoenix/LiveView specialist, real-time patterns
+
+**Review & Quality**:
+- **Torvalds** (Sonnet) — Code review, simplicity enforcement, good taste
+- **Beck** (Sonnet) — Test design, TDD discipline, behavioral coverage
+- **Ousterhout** (Opus) — Cognitive load analysis, deep module design
+- **Deming** (Opus) — Systemic quality prevention, process improvement
+
+**Expert Analysis**:
+- **Knuth** (Opus) — Algorithms, data structures, mathematical rigor
+- **Gregg** (Sonnet) — Performance profiling, benchmarking, observability
+
+**Orchestration**:
+- **PR Reviewer** (Sonnet) — Debate orchestration, GitHub PR automation
 
 ### 📚 8 Progressive Skills
 
@@ -213,6 +220,21 @@ Commands (you run these)
 
 The key insight: agents work best when the repository itself is the source of truth. Push conventions, invariants, and architecture into project docs — not into one-off prompts.
 
+### Personality-Driven Reviews
+
+Agents are modeled after real humans whose published philosophies align with each domain. This isn't cosmetic — the philosophy drives real behavioral differences:
+
+- **Dijkstra** refuses to produce architecture without identifying invariants
+- **Torvalds** rejects code that's correct but ugly or over-engineered
+- **Deming** doesn't review code — he reviews the process that produced it
+
+**How debate works:** During PR review, the orchestrator dispatches relevant agents in parallel (Round 1). Each produces an independent review. Then all findings are shared and agents rebut each other (Round 2) — challenging, conceding, or escalating disagreements. The orchestrator synthesizes:
+
+1. **Consensus** — all agents agree (definite action items)
+2. **Resolved debates** — one agent conceded (action items with rationale)
+3. **Unresolved disagreements** — both sides presented to you
+4. **Deming's process changes** — systemic improvements (Credo rules, CI gates, hooks)
+
 ### Setting Up a New Project
 
 Copy the templates and fill in your project's specifics:
@@ -331,9 +353,9 @@ team_learning_enabled: true
 
 **Workflow**:
 1. Feature request → `/feature` command
-2. elixir-architect (Opus) designs with complexity analysis
+2. Dijkstra (Opus) designs with complexity analysis
 3. User approval required
-4. elixir-developer (Sonnet) implements with TDD
+4. Valim (Sonnet) implements with TDD
 5. Precommit gate — developer must pass all four checks before handoff
 6. `/review` before proposing changes
 7. Hooks enforce standards at every edit and block commits without precommit
@@ -486,17 +508,18 @@ end
 ~/.claude/plugins/elixir-production/
 ├── .claude-plugin/
 │   └── plugin.json                # Plugin manifest
-├── agents/                        # 10 specialized agents
-│   ├── elixir-architect.md        # Feature design (Opus)
-│   ├── elixir-developer.md        # TDD implementation (Sonnet)
-│   ├── elixir-reviewer.md         # Code review (Sonnet)
-│   ├── test-designer.md           # Test strategy (Sonnet)
-│   ├── phoenix-expert.md          # LiveView specialist (Sonnet)
-│   ├── performance-analyzer.md    # Profiling/benchmarks (Sonnet)
-│   ├── pr-reviewer.md             # GitHub PR automation (Sonnet)
-│   ├── cognitive-scientist.md     # Cognitive load (Opus)
-│   ├── distributed-systems-expert.md  # Consensus/clustering (Opus)
-│   └── algorithms-researcher.md   # Algorithm research (Opus)
+├── agents/                        # 11 personality-driven agents
+│   ├── dijkstra.md               # Architecture (Opus) — Edsger Dijkstra
+│   ├── valim.md                  # Implementation (Sonnet) — Jose Valim
+│   ├── torvalds.md               # Code review (Sonnet) — Linus Torvalds
+│   ├── beck.md                   # Test design (Sonnet) — Kent Beck
+│   ├── mccord.md                 # Phoenix/LiveView (Sonnet) — Chris McCord
+│   ├── gregg.md                  # Performance (Sonnet) — Brendan Gregg
+│   ├── pr-reviewer.md            # Debate orchestration (Sonnet)
+│   ├── ousterhout.md             # Cognitive load (Opus) — John Ousterhout
+│   ├── lamport.md                # Distributed systems (Opus) — Leslie Lamport
+│   ├── knuth.md                  # Algorithms (Opus) — Donald Knuth
+│   └── deming.md                 # Quality prevention (Opus) — W. Edwards Deming
 ├── skills/                        # 8 progressive skills, 70 reference files
 │   ├── algorithms/                # SKILL.md + 14 reference files (data structures, ETS, graphs, spatial, streaming, optimization, statistics)
 │   ├── cognitive-complexity/      # SKILL.md + escalation + references/
@@ -594,9 +617,9 @@ This plugin incorporates patterns from official Claude Code plugins:
 
 ## Status & Roadmap
 
-### ✅ Fully Implemented (v2.5.0)
+### ✅ Fully Implemented (v3.0.0)
 
-All 10 agents, 8 skills, and 11 commands are complete and production-ready. Skills follow progressive disclosure: lean SKILL.md (<500 words) with deep reference files for domain knowledge. Precommit enforcement is active at three layers (hook, skill, workflow). Architectural invariants are documented, tracked, and mechanically enforced.
+All 11 personality-driven agents, 8 skills, and 11 commands are complete and production-ready. Agents are modeled after real humans whose published philosophies drive behavioral differences. PR reviews use a two-round debate mechanism where agents independently review, then rebut each other. Skills follow progressive disclosure: lean SKILL.md (<500 words) with deep reference files for domain knowledge. Precommit enforcement is active at three layers (hook, skill, workflow). Architectural invariants are documented, tracked, and mechanically enforced.
 
 ## Contributing
 
@@ -728,12 +751,17 @@ The skills in this plugin draw heavily from the work of many researchers and pra
 - Fred Hebert — distributed systems architectural principles, Erlang in Anger
 - Saša Jurić — "To spawn, or not to spawn?", "Beyond Task.Async", OTP process patterns
 - Chris Keathley — "Good and Bad Elixir", telemetry conventions, adaptive concurrency with Regulator
+- Chris McCord — Phoenix Framework, LiveView
 - Mitch Bernheisel — Safe Ecto Migrations
 
 **Software Design & Philosophy**:
+- Edsger Dijkstra — structured programming, EWD manuscripts, "A Discipline of Programming"
 - Dave Thomas (PragDave) — DDD, functional core/imperative shell, YAGNI
 - Quinn Wilton — correctness over convenience, production-grade engineering
 - John Ousterhout — "A Philosophy of Software Design": deep modules, information hiding, pull complexity downward
+- Linus Torvalds — Linux kernel development, "good taste" in code design
+- Kent Beck — "Test-Driven Development: By Example", Extreme Programming
+- W. Edwards Deming — "Out of the Crisis", 14 Points of Management, statistical process control
 
 **Distributed Systems**:
 - Marc Brooker — metastability, circuit breakers, backoff, redundancy analysis, Physalia, tail latency economics, simulation for system builders
@@ -756,6 +784,7 @@ The skills in this plugin draw heavily from the work of many researchers and pra
 
 **Performance & Latency**:
 - Jeffrey Dean & Luiz André Barroso — "The Tail at Scale"
+- Brendan Gregg — "Systems Performance", flame graphs, BPF performance tools
 
 **Algorithms & Data Structures**:
 - Chris Okasaki — "Purely Functional Data Structures"
@@ -780,4 +809,4 @@ The skills in this plugin draw heavily from the work of many researchers and pra
 
 ---
 
-**Version**: 2.5.0 - All 10 agents, 8 skills, and 11 commands are fully implemented and production-ready. Three-layer precommit enforcement prevents broken commits. Architectural invariants enforced mechanically.
+**Version**: 3.0.0 - All 11 personality-driven agents, 8 skills, and 11 commands are fully implemented and production-ready. Agents use a two-round debate mechanism for PR reviews. Three-layer precommit enforcement prevents broken commits. Architectural invariants enforced mechanically.
