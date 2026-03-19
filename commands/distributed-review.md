@@ -7,7 +7,7 @@ model: opus
 
 # Distributed Review Command
 
-Comprehensive review of distributed system architecture, consensus algorithms, clustering strategy, and potential distributed bugs. Launches the **distributed-systems-expert** agent (Opus) for deep analysis.
+Comprehensive review of distributed system architecture, consensus algorithms, clustering strategy, and potential distributed bugs. Launches the **lamport** agent (Opus) for deep analysis.
 
 ## What It Does
 
@@ -34,7 +34,7 @@ Analyzes distributed system design with focus on correctness and scale. Reviews 
 ### Step 1: Launch Distributed Systems Expert
 
 ```markdown
-Launching distributed-systems-expert agent (Opus) for distributed system analysis...
+Launching lamport agent (Opus) for distributed system analysis...
 
 Scope: [target area]
 
@@ -217,7 +217,7 @@ Based on `.claude/elixir-production.local.md`:
 
 ## Skill References
 
-The distributed-systems-expert agent uses these skill reference files for domain knowledge:
+The lamport agent uses these skill reference files for domain knowledge:
 
 - **distributed-systems/consensus.md** - Raft, Paxos, consensus algorithms
 - **distributed-systems/clustering.md** - Distributed Erlang, Partisan, libcluster

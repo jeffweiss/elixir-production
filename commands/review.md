@@ -15,7 +15,7 @@ Comprehensive code review against production standards with confidence-based rep
 
 ## What It Does
 
-Launches the **elixir-reviewer** agent to perform thorough code review:
+Launches the **torvalds** agent to perform thorough code review:
 
 1. **Context Loading** - Project standards and patterns
 2. **Dependency Check** - Verify credo and styler installed
@@ -54,7 +54,7 @@ Pre-loading relevant skills ensures the reviewer has full context for confidence
 ### Step 1: Launch Reviewer Agent
 
 ```markdown
-Launching elixir-reviewer agent for comprehensive code review...
+Launching torvalds agent for comprehensive code review...
 
 Scope: [file/directory/project]
 
@@ -71,7 +71,7 @@ Waiting for reviewer...
 
 ### Step 2: Reviewer Process
 
-The elixir-reviewer agent executes:
+The torvalds agent executes:
 
 ```bash
 # Load context

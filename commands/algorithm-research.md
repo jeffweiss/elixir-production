@@ -7,7 +7,7 @@ model: opus
 
 # Algorithm Research Command
 
-Launches the algorithms-researcher agent to conduct comprehensive research on algorithms and data structures, with paper citations and implementation guidance.
+Launches the knuth agent to conduct comprehensive research on algorithms and data structures, with paper citations and implementation guidance.
 
 ## Purpose
 
@@ -96,7 +96,7 @@ For substantial research:
 # [Research Topic] - Algorithms Bibliography
 
 **Date**: [Date]
-**Researcher**: algorithms-researcher agent
+**Researcher**: knuth agent
 **Context**: [Why research needed]
 
 ## Executive Summary
@@ -142,7 +142,7 @@ For substantial research:
 **Modern Alternative**: "Is there something faster than MD5?" → Research modern hash functions (xxHash, BLAKE3)
 **Novel Problem**: "Track top 1000 items in stream of billions" → Research Space-Saving, Count-Min Sketch, HeavyKeeper with full bibliography
 **Implementation Complexity**: "Should I switch to HyperLogLog?" → Cost-benefit analysis with go/no-go decision
-**Performance Optimization**: "Sorting too slow on large lists" → Research modern sorting (pdqsort, TimSort) and handoff to performance-analyzer
+**Performance Optimization**: "Sorting too slow on large lists" → Research modern sorting (pdqsort, TimSort) and handoff to gregg
 
 ## Research Quality Standards
 
@@ -166,8 +166,8 @@ The agent ensures:
 - ✅ Need academic paper citations for decision justification
 
 **Don't use algorithm-research when**:
-- ❌ Just need to optimize existing code (use performance-analyzer)
-- ❌ Problem is code quality, not algorithms (use architect)
+- ❌ Just need to optimize existing code (use gregg)
+- ❌ Problem is code quality, not algorithms (use dijkstra)
 - ❌ Well-known algorithm, just need implementation (use general assistant)
 
 ---
@@ -176,5 +176,5 @@ The agent ensures:
 
 **See also**:
 - `algorithms` skill for comprehensive algorithm patterns
-- `algorithms-researcher` agent for detailed methodology
-- `performance-analyzer` agent for benchmarking algorithms
+- `knuth` agent for detailed methodology
+- `gregg` agent for benchmarking algorithms

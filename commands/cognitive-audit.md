@@ -17,7 +17,7 @@ Analyzes code cognitive load, onboarding difficulty, and provides strategic refa
 
 ## What It Does
 
-Launches the **cognitive-scientist agent** (Opus) to perform deep analysis:
+Launches the **ousterhout** agent (Opus) to perform deep analysis:
 
 1. **Ousterhout Principle Analysis** - Deep vs shallow modules, information leakage, complexity push-up vs pull-down
 2. **Cognitive Load Metrics** - Working memory, semantic ambiguity, temporal coupling, pass-through complexity
@@ -46,7 +46,7 @@ Launches the **cognitive-scientist agent** (Opus) to perform deep analysis:
 ### Step 1: Launch Cognitive Scientist
 
 ```markdown
-Launching cognitive-scientist agent (Opus) for cognitive complexity analysis...
+Launching ousterhout agent (Opus) for cognitive complexity analysis...
 
 Scope: [target files/directories]
 
@@ -65,7 +65,7 @@ Waiting for analysis...
 
 ### Step 2: Analysis Process
 
-The cognitive-scientist agent executes:
+The ousterhout agent executes:
 
 ```bash
 # Load context

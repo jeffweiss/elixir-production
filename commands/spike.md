@@ -130,10 +130,10 @@ Track all SPIKE code for future migration to production quality.
 
 ### Step 3: Rapid Implementation
 
-Launch **elixir-developer** agent (Haiku) with SPIKE constraints:
+Launch **valim** agent (Haiku) with SPIKE constraints:
 
 ```markdown
-Launching elixir-developer (Haiku) in SPIKE mode...
+Launching valim (Haiku) in SPIKE mode...
 
 SPIKE Goal: [user's goal]
 

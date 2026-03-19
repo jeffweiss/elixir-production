@@ -80,10 +80,10 @@ Identifying comparison:
 
 ### Step 2: Analyze Complexity
 
-Launch **performance-analyzer** agent to analyze complexity:
+Launch **gregg** agent to analyze complexity:
 
 ```markdown
-Launching performance-analyzer agent (Sonnet) for complexity analysis...
+Launching gregg agent (Sonnet) for complexity analysis...
 
 Analyzing: MyApp.OrderProcessor.process_batch/1
 
@@ -299,7 +299,7 @@ When benchmark auto-triggered by architect:
 ```markdown
 ## Auto-Benchmark Triggered
 
-Context: elixir-architect detected O(n²) complexity during feature design
+Context: dijkstra detected O(n²) complexity during feature design
 
 Feature: Product search with filtering
 Function: MyApp.Products.search_with_filters/2
@@ -470,7 +470,7 @@ Large data sizes reveal O(n²) and O(n log n) differences.
 - `/review` (performance concerns)
 
 **Triggers**:
-- Performance-analyzer agent
+- gregg agent
 - Results inform optimization decisions
 - Updates to project-learnings.md
 

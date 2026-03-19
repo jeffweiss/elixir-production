@@ -109,10 +109,10 @@ Waiting for all agents to complete...
 
 ### Phase 2: Architecture Design
 
-Launch **elixir-architect** agent (Opus) with consolidated exploration:
+Launch **dijkstra** agent (Opus) with consolidated exploration:
 
 ```markdown
-Launching elixir-architect (Opus) to design architecture...
+Launching dijkstra (Opus) to design architecture...
 
 Providing context:
 - Feature requirement: Add email verification
@@ -258,10 +258,10 @@ I've designed a comprehensive architecture for email verification.
 
 ### Phase 4: TDD Implementation
 
-Launch **elixir-developer** agent (Sonnet) with architecture:
+Launch **valim** agent (Sonnet) with architecture:
 
 ```markdown
-User approved architecture. Launching elixir-developer (Sonnet) for TDD implementation...
+User approved architecture. Launching valim (Sonnet) for TDD implementation...
 
 Providing to developer:
 - Complete architecture plan

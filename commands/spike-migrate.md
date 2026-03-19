@@ -23,7 +23,7 @@ Transforms experimental SPIKE code into production-ready features through a 6-st
 
 1. **Analyze SPIKE Code** - Inventory existing code and identify quality gaps
 2. **Create Migration Plan** - Generate detailed checklist with TodoWrite
-3. **TDD Implementation** - Launch elixir-developer agent to add comprehensive tests first
+3. **TDD Implementation** - Launch valim agent to add comprehensive tests first
 4. **Upgrade Code** - Agent adds typespecs, error handling, documentation
 5. **Quality Gates** - Validate all precommit checks pass
 6. **Update Tracking** - Archive SPIKE in spike-debt.md, document learnings
@@ -75,7 +75,7 @@ Phase 1: Test Infrastructure | Phase 2: Core upgrades (typespecs, tests, validat
 
 ### Step 4: Launch TDD Migration Agent
 
-Launch **elixir-developer** agent (Sonnet) with migration context. Agent workflow:
+Launch **valim** agent (Sonnet) with migration context. Agent workflow:
 
 1. **Tests First (TDD)** - Comprehensive test suite (success, error, edge cases). Criticality 8-10. Red → Green → Refactor.
 2. **Upgrade Implementation** - Typespecs on all public functions. Full error handling. Input validation.
