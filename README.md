@@ -83,11 +83,8 @@ Beyond enforcement, the plugin provides 10 specialized agents, 8 progressive ski
 ### Install Plugin
 
 ```bash
-# Clone or copy plugin to Claude plugins directory
-cp -r elixir-production ~/.claude/plugins/
-
-# Verify installation
-claude-code --list-plugins
+claude plugin marketplace add jeffweiss/elixir-marketplace
+claude plugin install elixir-production@jeffweiss
 ```
 
 ### Project Setup
@@ -139,10 +136,10 @@ mix deps.get
 Validate your code meets production standards:
 
 ```bash
-claude-code /precommit
+claude /precommit
 
 # With auto-fix for formatting
-claude-code /precommit --fix
+claude /precommit --fix
 ```
 
 ### 2. Implement a Feature
@@ -150,7 +147,7 @@ claude-code /precommit --fix
 Use the guided feature workflow:
 
 ```bash
-claude-code /feature "Add user email verification"
+claude /feature "Add user email verification"
 ```
 
 This will:
